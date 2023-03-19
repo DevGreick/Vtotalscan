@@ -13,9 +13,9 @@ Ferramenta para multiplas analises de IP e URLS no site virustotal
 
 <p/>
 
-# Versão 0.1
+# Versão 0.2
 
-<a href="https://github.com/SecZeroR/Vtotalscan/releases/download/vtotal/Vtotalscan0.1.zip">   Baixe Aqui </a></p>
+<a href="https://github.com/SecZeroR/Vtotalscan/releases/download/0.2vtotal/Vtotalscan0.2.zip">   Baixe Aqui </a></p>
 
 <p align="center">
 <b>Utilização</b> </p>
