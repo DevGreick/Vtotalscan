@@ -30,7 +30,7 @@ Acesse o link https://www.virustotal.com/gui/my-apikey e crie sua chave API
 
 Insira a chave no arquivo API_KEY.ini
 
-Descompacte o arquivo vtotalscan0.1.zip
+Descompacte o arquivo vtotalscanX.X.zip
 
 Abra o arquivo scanvuln.exe 
 
