@@ -2,7 +2,7 @@
 Ferramenta para multiplas analises de IP e URLS no site virustotal
 
 
-<b>Essa ferramenta permite consultar a reputação de vários IPs e URLS do virustotal ( limitado a 4 por minuto ), conectando-se à API do virustotal, lendo a chave API do arquivo de configuração e gerando um relatório em formato Excel com os resultados da verificação, basta salvar os IPS em um arquivo ou manualmente   e executar no programa</b>
+<b>Essa ferramenta permite consultar a reputação de vários IPs e URLS do virustotal ( limitado a 4 por minuto a ferramenta automaticamente continuará sem nenhuma intervencao humana caso seja acima ), conectando-se à API do virustotal, lendo a chave API do arquivo de configuração e gerando um relatório em formato Excel com os resultados da verificação, basta salvar os IPS em um arquivo ou manualmente   e executar no programa</b>
 
 
 <p align="center">
