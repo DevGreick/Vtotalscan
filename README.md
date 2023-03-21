@@ -15,7 +15,7 @@
 
 # Versão 0.3
 
-<a href="https://github.com/SecZeroR/Vtotalscan/releases/download/0.3vtotal/vtotalscan0.3.zip">   Baixe Aqui </a></p>
+<a href="https://github.com/SecZeroR/Vtotalscan/releases/download/0.4vtotal/vtotalscan0.4.zip">   Baixe Aqui </a></p>
 
 <p align="center">
 <b>Utilização</b> </p>
