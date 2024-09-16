@@ -1,10 +1,6 @@
 # Vtotalscan
 
 
-<p align="center">
-  <img src="spy2-1.png" alt="Vtotalscan"/>
-</p>
-
 <b>Essa ferramenta permite consultar a reputação de vários IPs e URLS do virustotal, conectando-se à API do virustotal, lendo a chave API do arquivo de configuração e gerando um relatório em formato Excel com os resultados da verificação, basta salvar os IPS em um arquivo ou manualmente   e executar no programa</b>
 
 
