@@ -26,7 +26,7 @@ Certifique-se de ter a ultima versão do Python instalada no seu computador. htt
 
 Registre-se no site https://www.virustotal.com
 
-Acesse o link https://www.virustotal.com/gui/my-apikey e crie sua chave API
+Acesse o link https://www.virustotal.com/gui/user/vtotalscan/apikey e crie sua chave API
 
 Insira a chave no arquivo API_KEY.ini
 
