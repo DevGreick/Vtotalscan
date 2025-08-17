@@ -1,4 +1,4 @@
-# Vtotalscan v1.0
+<h1 align="center">Vtotalscan v1.0</h1>
 
 <div align="center">
 
@@ -15,6 +15,15 @@
 </p>
 
 Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que automatiza a consulta de IPs e URLs em múltiplas fontes, gera relatórios profissionais e cria resumos com IA local.
+
+---
+
+## Requisitos rápidos
+
+- **Python 3.8+** instalado no sistema. Baixe em: https://www.python.org/downloads/  
+- **Ollama** instalado (opcional) para usar os resumos por IA local. Baixe em: https://ollama.com/  
+- **Chaves de API** dos serviços que você pretende usar: VirusTotal, AbuseIPDB, URLHaus, Shodan.  
+- **Fonts DejaVu** (opcional, recomendadas para PDF): `DejaVuSans.ttf` e `DejaVuSans-Bold.ttf` na pasta do projeto.
 
 ---
 
@@ -61,10 +70,12 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 1. Acesse a página de **[Releases](https://github.com/DevGreick/Vtotalscan/releases)**.
 2. Baixe o arquivo `.zip` da versão mais recente (v1.0).
 3. Descompacte o arquivo e torne-o executável:
+
    ```bash
    chmod +x Vtotalscan
    ```
 4. Execute o programa:
+
    ```bash
    ./Vtotalscan
    ```
@@ -72,7 +83,17 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 ### Para Desenvolvedores (a partir do Código-Fonte)
 
-1. **Pré-requisitos:** Garanta que você tenha **Python 3.8+** e **Git** instalados. Para a função de IA, o **Ollama** ([ollama.com](https://ollama.com)) deve estar instalado.
+1. **Pré-requisitos:** Garanta que você tenha **Python 3.8+** e **Git** instalados. Para a função de IA, o **Ollama** ([https://ollama.com](https://ollama.com)) deve estar instalado e rodando localmente.
+   - Cheque se o Ollama está ok com:
+
+     ```bash
+     ollama list
+     ```
+   - Se quiser testar um modelo leve:
+
+     ```bash
+     ollama run llama3
+     ```
 
 2. **Clone o repositório:**
    ```bash
@@ -98,12 +119,10 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 3. **Acompanhe o Progresso:** Veja o status da análise em tempo real no "Console de Atividade".
 4. **Gere o Resumo com IA:** Após a análise, vá para a aba "Resumo Gerado por IA", selecione um modelo do Ollama e clique em "Gerar Resumo em PDF" ou "Gerar Resumo em Texto".
 
-
 ## ⚠️ Primeira Configuração Obrigatória
 
 Ao executar o Vtotalscan pela primeira vez, vá em **Configurações** e adicione suas chaves de API (VirusTotal, AbuseIPDB, URLHaus, Shodan).  
 Sem isso, o programa não conseguirá realizar as análises.
-
 
 ## Contribuição
 
