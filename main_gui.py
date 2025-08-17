@@ -273,7 +273,7 @@ class VtotalscanGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.last_analysis_results = None
-        self.setWindowTitle("Vtotalscan v2.0 by SecZeroR")
+        self.setWindowTitle("ThreatSpy v1.0 by SecZeroR")
         self.setFixedSize(700, 950)
         try:
             self.setWindowIcon(QIcon(resource_path("spy2.ico")))
@@ -289,7 +289,7 @@ class VtotalscanGUI(QMainWindow):
             logo_label.setPixmap(pixmap)
         except Exception as e:
             print(f"Erro ao carregar logo: {e}")
-        title_label = QLabel("Vtotalscan")
+        title_label = QLabel("ThreatSpy")
         title_label.setFont(QFont("Segoe UI", 20, QFont.Bold))
         btn_config = QPushButton("Configurações")
         try:
