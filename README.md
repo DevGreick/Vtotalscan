@@ -123,7 +123,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 3. **Acompanhe o Progresso:** Veja o status da análise em tempo real no "Console de Atividade".
 4. **Gere o Resumo com IA:** Após a análise, vá para a aba "Resumo Gerado por IA", selecione um modelo do Ollama e clique em "Gerar Resumo em PDF" ou "Gerar Resumo em Texto".
 
-## ⚠️ Primeira Configuração Obrigatória
+## ⚠️ Configuração Obrigatória
 
 Ao executar o Vtotalscan pela primeira vez, vá em **Configurações** e adicione suas chaves de API (VirusTotal, AbuseIPDB, URLHaus, Shodan).  
 Sem isso, o programa não conseguirá realizar as análises.
