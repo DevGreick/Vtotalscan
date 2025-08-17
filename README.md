@@ -18,7 +18,7 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
 
 ---
 
-## Requisitos rápidos
+## Requisitos 
 
 - **Python 3.8+** instalado no sistema. Baixe em: https://www.python.org/downloads/  
 - **Ollama** instalado (opcional) para usar os resumos por IA local. Baixe em: https://ollama.com/  
