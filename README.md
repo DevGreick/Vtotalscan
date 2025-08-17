@@ -35,7 +35,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 * **Gestão Segura de Chaves:** Suas chaves de API são armazenadas de forma segura no cofre de credenciais nativo do sistema operacional (**Windows Credential Manager, macOS Keychain, etc.**) usando a biblioteca `keyring`.
 * **Processamento Eficiente:** As análises rodam em uma thread separada para não travar a interface, com barra de progresso e opção de cancelamento. O cliente de API implementa um **rate limit inteligente**, respeitando os pedidos de espera das APIs (`Retry-After`).
 
-## 🖥️ Screenshot da Ferramenta
+## 🖥️ Screenshot 
 
 
 
