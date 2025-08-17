@@ -124,7 +124,6 @@ class ApiClient:
             return ["Erro ao buscar modelos"]
             
     def get_ai_summary(self, model, prompt):
-        # (sem alterações)
         if not self.ai_endpoint or not model:
             raise ValueError("Endpoint ou modelo da IA inválido/não selecionado.")
         try:
