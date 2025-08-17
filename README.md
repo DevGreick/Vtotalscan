@@ -102,7 +102,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 2. **Clone o repositório:**
    ```bash
    git clone https://github.com/DevGreick/ThreatSpy
-   cd Vtotalscan
+   cd ThreatSpy
    ```
 
 3. **Instale as dependências:**
