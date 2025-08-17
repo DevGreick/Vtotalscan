@@ -27,7 +27,9 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 
 
-![Screenshot da Aplicação](vtotalscan.png)
+<p align="center">
+  <img src="vtotalscan.png" alt="Screenshot da Aplicação">
+</p>
 
 ## ⚙️ Pré-requisitos
 
