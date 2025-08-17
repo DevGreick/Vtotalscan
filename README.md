@@ -1,4 +1,4 @@
-<h1 align="center">Vtotalscan v1.0</h1>
+<h1 align="center">ThreatSpy v1.0</h1>
 
 <div align="center">
 
