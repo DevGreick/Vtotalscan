@@ -81,6 +81,6 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 Este é um projeto de código aberto e contribuições são muito bem-vindas! Se você encontrar um bug, tiver uma sugestão de melhoria ou quiser adicionar uma nova funcionalidade, sinta-se à vontade para abrir uma **Issue** ou um **Pull Request**.
 
-## 📄 Licença
+## Licença
 
 Este projeto é distribuído sob a Licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
