@@ -1,5 +1,14 @@
 # Vtotalscan v1.0
 
+# Vtotalscan v1.0
+
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
+![GUI](https://img.shields.io/badge/GUI-PySide6-purple.svg)
+![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
+
+
 <p align="center">
   <img src="spy2-1.png" alt="Logo do Vtotalscan" width="150">
 </p>
