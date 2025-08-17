@@ -31,7 +31,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 * **Análise Multi-API:** Enriqueça seus dados consultando indicadores simultaneamente no **VirusTotal, AbuseIPDB, URLHaus e Shodan**.
 * **Interface Gráfica Moderna:** Uma interface intuitiva e agradável construída com **PySide6**, com tema escuro.
 * **Relatórios Profissionais:** Exporte os resultados consolidados para arquivos **Excel (.xlsx)** formatados (com cores e links) ou para um resumo em **PDF**.
-* **Resumos com IA Local:** Integração com **Ollama** para gerar resumos técnicos inteligentes das análises, com detecção automática dos seus modelos instalados. Seus dados nunca saem da sua máquina.
+* **Resumos com IA Local:** Integração com **Ollama** para gerar resumos técnicos inteligentes das análises, com detecção automática dos seus modelos instalados, seus dados nunca saem da sua máquina.
 * **Gestão Segura de Chaves:** Suas chaves de API são armazenadas de forma segura no cofre de credenciais nativo do sistema operacional (**Windows Credential Manager, macOS Keychain, etc.**) usando a biblioteca `keyring`.
 * **Processamento Eficiente:** As análises rodam em uma thread separada para não travar a interface, com barra de progresso e opção de cancelamento. O cliente de API implementa um **rate limit inteligente**, respeitando os pedidos de espera das APIs (`Retry-After`).
 
