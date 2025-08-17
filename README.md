@@ -55,7 +55,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 2.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/DevGreick/Vtotalscan.git](https://github.com/DevGreick/Vtotalscan.git)
+    git clone https://github.com/DevGreick/Vtotalscan.git
     cd Vtotalscan
     ```
 
