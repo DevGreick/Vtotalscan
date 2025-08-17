@@ -76,12 +76,12 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 3. Descompacte o arquivo e torne-o executável:
 
    ```bash
-   chmod +x Vtotalscan
+   chmod +x ThreatSpy
    ```
 4. Execute o programa:
 
    ```bash
-   ./Vtotalscan
+   ./ThreatSpy
    ```
 5. Na primeira vez que usar, vá em **Configurações** para adicionar suas chaves de API.
 
@@ -101,7 +101,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 2. **Clone o repositório:**
    ```bash
-   git clone https://github.com/DevGreick/Vtotalscan.git
+   git clone https://github.com/DevGreick/ThreatSpy
    cd Vtotalscan
    ```
 
