@@ -3,3 +3,4 @@ requests
 urllib3
 xlsxwriter
 reportlab
+keyring
