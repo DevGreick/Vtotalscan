@@ -1,6 +1,8 @@
 # Vtotalscan v1.0
 
-![Logo do Vtotalscan](spy2-1.png)
+<p align="center">
+  <img src="spy2-1.png" alt="Logo do Vtotalscan" width="150">
+</p>
 
 Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que automatiza a consulta de IPs e URLs em múltiplas fontes, gera relatórios profissionais e cria resumos com IA local.
 
