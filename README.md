@@ -49,8 +49,8 @@ Antes de começar, garanta que você tem os seguintes pré-requisitos instalados
 
 1.  **Python 3.8 ou superior**.
 2.  As bibliotecas Python listadas no arquivo `requirements.txt`.
-3.  **Ollama (Opcional):** Necessário apenas se você quiser usar a funcionalidade de resumo com IA. Disponível em [ollama.com](https://ollama.com).
-4.  **Fontes DejaVu (Opcional):** Recomendado para a correta geração dos PDFs. Baixe os arquivos `DejaVuSans.ttf` e `DejaVuSans-Bold.ttf` e coloque-os na mesma pasta do projeto.
+3.  **Ollama (Opcional):** Necessário apenas se você quiser usar a funcionalidade de resumo com IA, disponível em [ollama.com](https://ollama.com).
+4.  **Fontes DejaVu (Opcional):** Recomendado para a correta geração dos PDFs, baixe os arquivos `DejaVuSans.ttf` e `DejaVuSans-Bold.ttf` e coloque-os na mesma pasta do projeto.
 5.  **Chaves de API:** Você precisará de chaves para os serviços que deseja usar:
     * [VirusTotal](https://www.virustotal.com/gui/join-us)
     * [AbuseIPDB](https://www.abuseipdb.com/register)
