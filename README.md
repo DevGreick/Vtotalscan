@@ -22,7 +22,11 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
 
 - **Python 3.8+** instalado no sistema. Baixe em: https://www.python.org/downloads/  
 - **Ollama** instalado (opcional) para usar os resumos por IA local. Baixe em: https://ollama.com/  
-- **Chaves de API** dos serviços que você pretende usar: VirusTotal, AbuseIPDB, URLHaus, Shodan.  
+- **Chaves de API** dos serviços que você pretende usar:  
+  - [VirusTotal](https://www.virustotal.com/gui/join-us)  
+  - [AbuseIPDB](https://www.abuseipdb.com/register)  
+  - [URLHaus](https://urlhaus.abuse.ch/api/) 
+  - [Shodan](https://account.shodan.io/register)  
 - **Fonts DejaVu** (opcional, recomendadas para PDF): `DejaVuSans.ttf` e `DejaVuSans-Bold.ttf` na pasta do projeto.
 
 ---
