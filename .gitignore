@@ -1,0 +1,22 @@
+# Arquivos de configuração pessoal (NÃO SUBIR!)
+API_KEY.ini
+
+# Arquivos de log e bancos de dados
+*.log
+*.db
+*.sqlite3
+
+# Arquivos gerados pela aplicação
+*.xlsx
+*.pdf
+
+# Diretórios de cache e dependências do Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+.env/
+build/
+dist/
+*.spec
