@@ -33,7 +33,7 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
 
 ## Sobre o Projeto
 
-O Vtotalscan é uma ferramenta de código aberto para análise de indicadores de comprometimento (IPs e URLs). Ele automatiza consultas em múltiplas APIs (VirusTotal, AbuseIPDB, URLHaus, Shodan) para enriquecer dados e gerar relatórios de forma rápida.
+O Vtotalscan é uma ferramenta de código aberto para análise (IPs e URLs). Ele automatiza consultas em múltiplas APIs (VirusTotal, AbuseIPDB, URLHaus, Shodan) para enriquecer dados e gerar relatórios de forma rápida.
 
 O projeto começou como um script simples para um colega e evoluiu para esta suíte de análise completa, com interface gráfica moderna e IA local para resumos.
 
