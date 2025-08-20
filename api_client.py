@@ -36,9 +36,8 @@ class ApiClient:
                 response.raise_for_status() 
                 return response.json()
             except requests.exceptions.HTTPError as e:
-                # Se for um erro do lado do cliente (4xx), não adianta tentar de novo (exceto 429 e 403)
                 if 400 <= e.response.status_code < 500:
-                    if e.response.status_code == 429 or e.response.status_code == 403: # Rate limit ou Forbidden
+                    if e.response.status_code == 429 or e.response.status_code == 403: 
                         logging.warning(f"Limite/bloqueio da API atingido ({e.response.status_code}). Aguardando para tentar novamente...")
                         time.sleep((backoff_factor ** retries))
                         retries += 1
@@ -51,9 +50,8 @@ class ApiClient:
                         return {"error": "Not Found"}
                     
                     logging.error(f"Erro de Cliente HTTP (4xx) em '{url}': {e}")
-                    return None # Não tenta de novo para outros erros como 401
+                    return None 
                 
-                # Se for erro do servidor (5xx), espera e tenta de novo
                 logging.warning(f"Erro de Servidor HTTP (5xx) em '{url}': {e}. Tentando novamente...")
                 time.sleep((backoff_factor ** retries))
                 retries += 1
