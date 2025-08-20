@@ -43,7 +43,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 - **Análise Massivamente Paralela**: O motor de análise foi reescrito para usar processamento paralelo, consultando dezenas de indicadores simultaneamente e reduzindo drasticamente o tempo de análise.
 - **Interface Gráfica Moderna**: Uma interface intuitiva construída com PySide6, com tema escuro e uma janela de configurações organizada em abas.
 - **Relatórios Profissionais**: Exporte os resultados para arquivos Excel (.xlsx) formatados ou para um resumo em PDF, que agora inclui um rodapé profissional com data, hora e número de página.
-- **Resumos com IA Contextual**: A integração com Ollama. A IA entende o status da análise (por exemplo: "Não Encontrado", "Limite de API Atingido") e fornece recomendações específicas para cada cenário.
+- **Resumos com IA Contextual**: Integração com Ollama. A IA entende o status da análise (por exemplo: "Não Encontrado", "Limite de API Atingido") e fornece recomendações específicas para cada cenário.
 - **Gestão Segura de Chaves**: Suas chaves de API são armazenadas de forma segura no cofre de credenciais nativo do sistema operacional usando a biblioteca `keyring`.
 - **Confiável e resiliente**
   - Verificação de arquivos em uso: avisa se um arquivo a ser analisado, ou o relatório de saída, está bloqueado por outro programa.
