@@ -131,10 +131,11 @@ As chaves abaixo não são obrigatórias, mas enriquecem enormemente a análise,
 -   **URLHaus:** Verifica se uma URL está listada em sua base de dados de URLs maliciosas.
 -   **MalwareBazaar:** Verifica o hash de arquivos contra sua base de dados de amostras de malware.
 
+> Se uma chave opcional não for fornecida, o programa continuará funcionando normalmente, e as colunas correspondentes no relatório simplesmente não serão preenchidas.
+
 #### IA Local (Opcional)
 -   **Ollama:** Para usar a funcionalidade de resumo com Inteligência Artificial, você precisa ter o [Ollama](https://ollama.com/) instalado e em execução no seu computador. O endpoint padrão (`http://localhost:11434/api/generate`) já vem configurado.
 
-> Se uma chave opcional não for fornecida, o programa continuará funcionando normalmente, e as colunas correspondentes no relatório simplesmente não serão preenchidas.
 
 ## Como Usar
 
