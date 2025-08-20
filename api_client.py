@@ -3,14 +3,15 @@ import configparser
 import urllib3
 import time
 import keyring
+import logging
 
 class ApiClient:
     def __init__(self):
-        
         self.vt_api_key = keyring.get_password("vtotalscan", "virustotal_api_key")
         self.abuseipdb_api_key = keyring.get_password("vtotalscan", "abuseipdb_api_key")
         self.urlhaus_api_key = keyring.get_password("vtotalscan", "urlhaus_api_key")
         self.shodan_api_key = keyring.get_password("vtotalscan", "shodan_api_key")
+        self.mb_api_key = keyring.get_password("vtotalscan", "malwarebazaar_api_key")
         self.ai_endpoint = self._read_config('AI', 'endpoint')
         
         self.session = requests.Session()
@@ -18,49 +19,52 @@ class ApiClient:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def _read_config(self, section, key):
-       
         try:
             config = configparser.ConfigParser()
             config.read('API_KEY.ini')
             return config.get(section, key, fallback=None)
-        except Exception:
+        except Exception as e:
+            logging.error(f"Erro ao ler o arquivo de configuração API_KEY.ini: {e}")
             return None
 
     def _make_request(self, method, url, max_retries=3, **kwargs):
-        """
-        Função central para fazer requisições, com lógica de rate limit inteligente.
-        """
         retries = 0
+        backoff_factor = 2 
         while retries < max_retries:
             try:
                 response = self.session.request(method, url, timeout=20, **kwargs)
-                
-                
-                if response.status_code == 429:
-                    retry_after = int(response.headers.get("Retry-After", 60))
-                    print(f"Limite da API atingido. Aguardando {retry_after} segundos...")
-                    time.sleep(retry_after)
-                    retries += 1
-                    continue 
-                
                 response.raise_for_status() 
                 return response.json()
-
             except requests.exceptions.HTTPError as e:
+                # Se for um erro do lado do cliente (4xx), não adianta tentar de novo (exceto 429 e 403)
+                if 400 <= e.response.status_code < 500:
+                    if e.response.status_code == 429 or e.response.status_code == 403: # Rate limit ou Forbidden
+                        logging.warning(f"Limite/bloqueio da API atingido ({e.response.status_code}). Aguardando para tentar novamente...")
+                        time.sleep((backoff_factor ** retries))
+                        retries += 1
+                        if retries == max_retries:
+                            logging.error(f"Máximo de retentativas para limite de API atingido em {url}.")
+                            return {"error": "Rate Limit"}
+                        continue
+                    if e.response.status_code == 404 and ("shodan" in url or "virustotal.com/api/v3/files/" in url):
+                        logging.info(f"Recurso não encontrado na API (404): {url}")
+                        return {"error": "Not Found"}
+                    
+                    logging.error(f"Erro de Cliente HTTP (4xx) em '{url}': {e}")
+                    return None # Não tenta de novo para outros erros como 401
                 
-                if "shodan" in url and e.response.status_code == 404:
-                    print(f"Recurso não encontrado no Shodan: {url}")
-                    return {"error": "Not found"}
-                print(f"Erro HTTP em '{url}': {e}")
-                return None
-            except requests.exceptions.RequestException as e:
-                print(f"Erro de requisição em '{url}': {e}")
-                return None
-        
-        print(f"Máximo de tentativas atingido para a URL: {url}")
-        return None
+                # Se for erro do servidor (5xx), espera e tenta de novo
+                logging.warning(f"Erro de Servidor HTTP (5xx) em '{url}': {e}. Tentando novamente...")
+                time.sleep((backoff_factor ** retries))
+                retries += 1
 
-  
+            except requests.exceptions.RequestException as e:
+                logging.warning(f"Erro de requisição em '{url}': {e}. Tentando novamente...")
+                time.sleep((backoff_factor ** retries))
+                retries += 1
+        
+        logging.error(f"Máximo de tentativas atingido para a URL: {url}")
+        return None
 
     def check_ip(self, ip):
         if not self.vt_api_key: return None
@@ -88,6 +92,19 @@ class ApiClient:
             time.sleep(15)
         return None
 
+    def check_file(self, file_hash):
+        if not self.vt_api_key: return None
+        url = f"https://www.virustotal.com/api/v3/files/{file_hash}"
+        headers = {"x-apikey": self.vt_api_key}
+        return self._make_request('GET', url, headers=headers)
+
+    def check_hash_malwarebazaar(self, file_hash):
+        if not self.mb_api_key: return None
+        url = "https://mb-api.abuse.ch/api/v1/"
+        headers = { 'Auth-Key': self.mb_api_key }
+        data = { 'query': 'get_info', 'hash': file_hash }
+        return self._make_request('POST', url, headers=headers, data=data)
+
     def check_ip_abuseipdb(self, ip):
         if not self.abuseipdb_api_key: return None
         url = 'https://api.abuseipdb.com/api/v2/check'
@@ -96,17 +113,39 @@ class ApiClient:
         return self._make_request('GET', url, headers=headers, params=params)
 
     def check_url_urlhaus(self, url_to_check):
-        if not self.urlhaus_api_key: return None
+        if not self.urlhaus_api_key:
+            logging.warning("Chave de API do URLhaus não configurada. Pulando consulta.")
+            return None
         url = 'https://urlhaus-api.abuse.ch/v1/url/'
         data = {'url': url_to_check}
         headers = {'Auth-Key': self.urlhaus_api_key}
-        return self._make_request('POST', url, headers=headers, data=data)
+        return self._make_request('POST', url, data=data, headers=headers)
 
     def check_ip_shodan(self, ip):
         if not self.shodan_api_key: return None
         url = f"https://api.shodan.io/shodan/host/{ip}"
         params = {'key': self.shodan_api_key}
         return self._make_request('GET', url, params=params)
+
+    def check_ip_multi(self, ip):
+        return {
+            'virustotal': self.check_ip(ip),
+            'abuseipdb': self.check_ip_abuseipdb(ip),
+            'shodan': self.check_ip_shodan(ip)
+        }
+
+    def check_url_multi(self, url):
+        return {
+            'virustotal': self.check_url(url),
+            'urlhaus': self.check_url_urlhaus(url)
+        }
+
+    def check_file_multi(self, file_hash, filename):
+        return {
+            'virustotal': self.check_file(file_hash),
+            'malwarebazaar': self.check_hash_malwarebazaar(file_hash),
+            'filename': filename
+        }
             
     def get_local_models(self):
         if not self.ai_endpoint: return ["Erro: Endpoint não configurado"]
@@ -121,6 +160,7 @@ class ApiClient:
         except requests.exceptions.ConnectionError:
             return ["Ollama não encontrado (Verifique Endpoint)"]
         except Exception as e:
+            logging.error(f"Erro ao buscar modelos de IA: {e}")
             return ["Erro ao buscar modelos"]
             
     def get_ai_summary(self, model, prompt):
@@ -134,4 +174,5 @@ class ApiClient:
         except requests.exceptions.ConnectionError:
             return f"Erro de Conexão: Não foi possível conectar ao Ollama em {self.ai_endpoint}."
         except Exception as e:
-            return f"Falha ao contatar a IA: {e}"
+            logging.error(f"Falha ao contatar a IA: {e}", exc_info=True)
+            return f"Falha ao contatar a IA. Veja threatspy.log para detalhes."
