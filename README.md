@@ -1,4 +1,4 @@
-<h1 align="center">ThreatSpy v1.0</h1>
+<h1 align="center">ThreatSpy</h1>
 
 <div align="center">
 
