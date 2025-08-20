@@ -65,14 +65,14 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 1. Acesse a página de **[Releases](https://github.com/DevGreick/ThreatSpy/releases)**.
 2. Baixe o arquivo `.zip` ou `.exe` da versão mais recente (v1.0).
 3. Se baixou o `.zip`, descompacte o arquivo em uma pasta.
-4. Execute o arquivo `Vtotalscan.exe`.
+4. Execute o arquivo `ThreatSpy.exe`.
 5. Na primeira vez que usar, vá em **Configurações** para adicionar suas chaves de API.
 
 ### Para Usuários (macOS)
 
 1. Acesse a página de **[Releases](https://github.com/DevGreick/ThreatSpy/releases)**.
 2. Baixe o arquivo `.zip` ou `.app` da versão mais recente (v1.0).
-3. Descompacte e execute o arquivo `Vtotalscan.app`.
+3. Descompacte e execute o arquivo `ThreatSpy.app`.
 4. Nota: o macOS pode exibir um aviso de segurança. Se isso ocorrer, clique com o botão direito no arquivo, selecione "Abrir" e confirme na caixa de diálogo para permitir a execução.
 
 ### Para Usuários (Linux)
