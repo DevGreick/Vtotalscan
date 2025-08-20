@@ -118,6 +118,26 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
    python main_gui.py
    ```
 
+## Configuração
+Após instalar e executar o ThreatSpy pela primeira vez, a etapa mais importante é configurar as chaves de API.
+
+Clique no botão **Configurações** no canto superior direito para abrir a janela de gerenciamento de chaves.
+
+####  Chave Principal (Essencial)
+-   **VirusTotal:** Esta chave é essencial para a funcionalidade principal do programa (análise de IPs, URLs e arquivos). O ThreatSpy irá solicitar que você a configure no primeiro uso.
+
+####  Chaves Opcionais (Recomendadas)
+As chaves abaixo não são obrigatórias, mas enriquecem enormemente a análise, adicionando mais contexto e fontes de dados aos seus relatórios.
+-   **AbuseIPDB:** Fornece um score de abuso e a localização de IPs.
+-   **Shodan:** Busca por portas abertas, vulnerabilidades (CVEs) e outros detalhes de infraestrutura de IPs.
+-   **URLHaus:** Verifica se uma URL está listada em sua base de dados de URLs maliciosas.
+-   **MalwareBazaar:** Verifica o hash de arquivos contra sua base de dados de amostras de malware.
+
+#### IA Local (Opcional)
+-   **Ollama:** Para usar a funcionalidade de resumo com Inteligência Artificial, você precisa ter o [Ollama](https://ollama.com/) instalado e em execução no seu computador. O endpoint padrão (`http://localhost:11434/api/generate`) já vem configurado.
+
+> Se uma chave opcional não for fornecida, o programa continuará funcionando normalmente, e as colunas correspondentes no relatório simplesmente não serão preenchidas.
+
 ## Como Usar
 
 A ferramenta possui dois fluxos de análise principais.
@@ -129,9 +149,7 @@ A ferramenta possui dois fluxos de análise principais.
 
 Após qualquer análise, a aba **Resumo Gerado por IA** pode ser usada para gerar relatórios em texto ou PDF.
 
-## Configuração Obrigatória
 
-Ao executar o ThreatSpy pela primeira vez, vá em **Configurações** e adicione suas chaves de API. A ferramenta funcionará de forma limitada sem elas, mas para obter o máximo de enriquecimento de dados, a configuração é essencial.
 
 ## Contribuição
 
