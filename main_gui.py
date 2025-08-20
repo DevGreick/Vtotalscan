@@ -167,7 +167,6 @@ class AISummaryWorker(QThread):
         facts = "Dossiê de Análise de Ameaças:\n\n"
         malicious_indicators_exist = False
         
-        # Estruturas para armazenar falhas por serviço
         rate_limited_by_service = defaultdict(list)
 
         files_data = self.analysis_data.get('files', {})
@@ -201,7 +200,6 @@ class AISummaryWorker(QThread):
                 if (vt_res and not vt_res.get('error') and (vt_res.get('data',{}).get('attributes',{}).get('last_analysis_stats',{}).get('malicious',0) > 0)):
                     malicious_ips.append(ip)
                 if vt_res and vt_res.get('error') == 'Rate Limit': rate_limited_by_service['VirusTotal'].append(ip)
-                # Adicionar checagens de rate limit para abuseipdb e shodan se necessário
             
             facts += f"**Análise de IPs ({len(ips_data)} total):**\n"
             if malicious_ips: facts += f"- Maliciosos: {len(malicious_ips)} ({', '.join(malicious_ips)})\n"; malicious_indicators_exist = True
