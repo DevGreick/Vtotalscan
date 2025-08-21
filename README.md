@@ -41,7 +41,7 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
 </details>
 
 <a id="sobre-o-projeto"></a>
-##  Sobre o Projeto
+## 🧩 Sobre o Projeto
 
 ThreatSpy é uma ferramenta de Threat Intelligence com interface gráfica, desenvolvida para simplificar a análise de indicadores de ameaça. Com ela, você pode investigar IPs, URLs, arquivos e repositórios de código suspeitos de forma rápida e segura.
 
@@ -49,7 +49,7 @@ ThreatSpy é uma ferramenta de Threat Intelligence com interface gráfica, desen
 O projeto começou como um script simples para um colega e evoluiu para esta suíte de análise completa, a ferramenta automatiza consultas a múltiplas fontes (VirusTotal, AbuseIPDB, Shodan, etc.), gera relatórios detalhados em Excel e PDF, e utiliza um modelo de IA local (via Ollama) para criar resumos executivos das análises.
 
 <a id="caso-real"></a>
-## Caso Real – O Golpe do Repositório Falso
+## 🚨 Caso Real – O Golpe do Repositório Falso
 
 Recentemente, um golpe de recrutamento no LinkedIn usou repositórios GitHub maliciosos como testes técnicos para DEVs. O objetivo era infectar a máquina do candidato para roubar credenciais.
 
@@ -62,7 +62,7 @@ Com o ThreatSpy, você não precisa clonar ou executar nada. Basta usar a aba **
 Ao final, você recebe um relatório completo do risco antes de expor seu ambiente.
 
 <a id="funcionalidades-principais"></a>
-##  Funcionalidades Principais
+## ✨ Funcionalidades Principais
 
 - **Análise Multi-Fonte**: consulta a reputação de IOCs em serviços como VirusTotal, AbuseIPDB, Shodan e MalwareBazaar.
 - **Análise Estática de Repositórios**: inspeciona repositórios GitHub e GitLab em busca de segredos vazados e arquivos suspeitos.
@@ -72,14 +72,14 @@ Ao final, você recebe um relatório completo do risco antes de expor seu ambien
 - **Segurança**: aplica técnicas de *defang* em todos os relatórios para evitar a execução acidental de links ou IPs maliciosos.
 
 <a id="screenshot-da-ferramenta"></a>
-## Screenshot da Ferramenta
+## 📸 Screenshot da Ferramenta
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ThreatsSy.png" alt="Screenshot da Aplicação">
 </p>
 
 <a id="download-e-instalacao"></a>
-##  Download e Instalação
+## ⚡ Download e Instalação
 
 <a id="para-usuarios-windows"></a>
 ### Para Usuários (Windows)
@@ -137,7 +137,7 @@ python main_gui.py
 ```
 
 <a id="configuracao-essencial"></a>
-##  Configuração Essencial
+## ⚙️ Configuração Essencial
 
 Antes do primeiro uso, você precisa configurar suas chaves de API.
 
@@ -156,7 +156,7 @@ Antes do primeiro uso, você precisa configurar suas chaves de API.
 - **Ollama**: verifique se o serviço está rodando para usar a funcionalidade de resumo por IA. O endpoint padrão já vem configurado.
 
 <a id="como-usar"></a>
-## Como Usar
+## 🛠️ Como Usar
 
 Toda a operação é feita através da interface gráfica.
 
@@ -176,7 +176,7 @@ Após cada análise, você pode usar os botões na parte inferior para gerar res
 - [ ] Automação de alertas com base em regras personalizadas.
 
 <a id="contribuicao"></a>
-## Contribuição
+## 🤝 Contribuição
 
 Contribuições são muito bem-vindas!
 
@@ -198,6 +198,6 @@ Se você achou esta ferramenta útil, considere apoiar meu trabalho. Isso ajuda 
 </div>
 
 <a id="licenca"></a>
-##  Licença
+## 📜 Licença
 
 Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` para mais informações.
