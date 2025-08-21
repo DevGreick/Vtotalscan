@@ -18,7 +18,7 @@ from PySide6.QtCore import Qt, QThread, Signal
 from api_client import ApiClient
 from report_generator import ReportGenerator
 from repository_analyzer import RepositoryAnalyzer
-from utils import parse_targets, calculate_sha256, resource_path, defang_ioc, parse_repo_urls
+from utils import parse_targets, calculate_sha256, resource_path, defang_ioc, parse_repo_urls, is_file_writable
 
 def setup_logging():
     log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(module)s:%(lineno)d] - %(message)s')
@@ -463,8 +463,16 @@ class VtotalscanGUI(QMainWindow):
     
     def start_repo_analysis(self):
         input_text = self.repo_url_input.toPlainText()
-        repo_urls, invalid_lines = parse_repo_urls(input_text)
+        repo_urls, invalid_lines, duplicate_lines = parse_repo_urls(input_text)
 
+        if duplicate_lines:
+            ignored_text = "\n".join(f"- {line}" for line in duplicate_lines)
+            QMessageBox.information(
+                self, 
+                "Entradas Duplicadas Ignoradas",
+                f"As seguintes URLs de repositório estavam duplicadas e foram ignoradas:\n\n{ignored_text}"
+            )
+            
         if invalid_lines:
             ignored_text = "\n".join(f"- {line}" for line in invalid_lines)
             QMessageBox.warning(
@@ -481,6 +489,11 @@ class VtotalscanGUI(QMainWindow):
         save_path, _ = QFileDialog.getSaveFileName(self, "Salvar Relatório de Análise", "Analise_Repositorios.xlsx", "Arquivos Excel (*.xlsx)")
         if not save_path:
             self.log("Operação de salvar cancelada.")
+            return
+            
+        if not is_file_writable(save_path):
+            QMessageBox.critical(self, "Erro de Permissão", f"Não é possível escrever no arquivo:\n{save_path}\n\nVerifique se o arquivo já está aberto ou se você tem permissão.")
+            self.log(f"Falha ao escrever no relatório. Verifique se o arquivo está aberto.")
             return
             
         self.log(f"Análise de {len(repo_urls)} repositório(s) iniciada...")
@@ -500,6 +513,11 @@ class VtotalscanGUI(QMainWindow):
             self.log("Operação de salvar cancelada.")
             return
 
+        if not is_file_writable(filepath):
+            QMessageBox.critical(self, "Erro de Permissão", f"Não é possível escrever no arquivo:\n{filepath}\n\nVerifique se o arquivo já está aberto ou se você tem permissão.")
+            self.log(f"Falha ao escrever no relatório. Verifique se o arquivo está aberto.")
+            return
+
         self.progress_dialog = QProgressDialog("Análise de IOCs em progresso...", "Cancelar", 0, 100, self)
         self.progress_dialog.setWindowTitle("Aguarde"); self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.analysis_thread = AnalysisWorker(self.text_area.toPlainText(), filepath)
@@ -517,6 +535,11 @@ class VtotalscanGUI(QMainWindow):
         save_path, _ = QFileDialog.getSaveFileName(self, "Salvar Relatório de Arquivos", "Analise_Arquivos.xlsx", "Arquivos Excel (*.xlsx)")
         if not save_path:
             self.log("Operação de salvar cancelada.")
+            return
+
+        if not is_file_writable(save_path):
+            QMessageBox.critical(self, "Erro de Permissão", f"Não é possível escrever no arquivo:\n{save_path}\n\nVerifique se o arquivo já está aberto ou se você tem permissão.")
+            self.log(f"Falha ao escrever no relatório. Verifique se o arquivo está aberto.")
             return
 
         self.progress_dialog = QProgressDialog("Análise de arquivos em progresso...", "Cancelar", 0, 100, self)
