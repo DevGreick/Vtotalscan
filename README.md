@@ -173,7 +173,7 @@ As chaves abaixo não são obrigatórias, mas enriquecem enormemente a análise,
 
 ## Como Usar
 
-A ferramenta possui dois fluxos de análise principais.
+A ferramenta possui três fluxos de análise principais.
 
 | Tipo de análise            | Como fazer |
 |----------------------------|------------|
