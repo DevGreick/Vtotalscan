@@ -23,7 +23,7 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
 > Abra o Sumário abaixo para navegar rápido
 
 <details>
-  <summary><strong> Sumário</strong> <sub>(clique para expandir)</sub></summary>
+  <summary><strong>Sumário</strong> <sub>(clique para expandir)</sub></summary>
 
   <br/>
 
@@ -43,8 +43,10 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
   - [Como Usar](#como-usar)
   - [Contribuição](#contribuição)
   - [Licença](#licença)
+  - [Apoie o Projeto](#apoie-o-projeto)
 
 </details>
+
 
 
 
@@ -190,21 +192,23 @@ Este projeto é distribuído sob a Licença MIT. Veja o arquivo `LICENSE` para m
 
 
 
+<a id="apoie-o-projeto"></a>
 <div align="right">
-  <table style="border: 0;">
+  <table style="border:0;">
     <tr>
-      <td style="border: 0; padding-right: 10px;">
-        <span style="font-size: 16px; font-weight: 500; font-family: sans-serif; color: #c0caf5;">
+      <td style="border:0; padding-right:10px;">
+        <span style="font-size:16px; font-weight:500; font-family:sans-serif; color:#c0caf5;">
           Apoie meu trabalho
         </span>
       </td>
-      <td style="border: 0;">
-        <a href="https://buymeacoffee.com/devgreick" target="_blank">
+      <td style="border:0;">
+        <a href="https://buymeacoffee.com/devgreick" target="_blank" rel="noopener">
           <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" width="120">
         </a>
       </td>
     </tr>
   </table>
 </div>
+
 
 
