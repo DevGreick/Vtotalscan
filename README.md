@@ -157,3 +157,23 @@ Este é um projeto de código aberto e contribuições são muito bem-vindas. Se
 ## Licença
 
 Este projeto é distribuído sob a Licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+
+
+
+<div align="right">
+  <table>
+    <tr>
+      <td style="border: 0; padding-right: 10px;">
+        <span style="font-size: 18px; font-weight: 500; font-family: sans-serif; color: #c0caf5;">
+          ☕ Apoie meu trabalho
+        </span>
+      </td>
+      <td style="border: 0;">
+        <a href="https://buymeacoffee.com/devgreick" target="_blank">
+          <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" width="140">
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+
