@@ -47,10 +47,6 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
 
 </details>
 
-
-
-
-
 ## Requisitos
 
 - **Python 3.8+** instalado no sistema. Baixe em: https://www.python.org/downloads/
@@ -61,6 +57,8 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
   - URLHaus
   - Shodan
   - MalwareBazaar
+  - GitHub (para análise de repositórios)
+  - GitLab (para análise de repositórios)
 - **Fonts DejaVu** (opcional, recomendadas para PDF): `DejaVuSans.ttf` e `DejaVuSans-Bold.ttf` na pasta do projeto.
 
 ## Sobre o Projeto
@@ -73,6 +71,10 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 - **Análise Multi-Alvo**: Verifique a reputação de IPs, URLs e arquivos locais. A ferramenta consulta o VirusTotal e o MalwareBazaar para identificar ameaças conhecidas em arquivos.
 - **Análise Massivamente Paralela**: O motor de análise foi reescrito para usar processamento paralelo, consultando dezenas de indicadores simultaneamente e reduzindo drasticamente o tempo de análise.
+- **Análise de Repositórios**: Cole a URL de um repositório público do GitHub/GitLab e o ThreatSpy irá procurar por:
+  - Segredos expostos (API keys, tokens, chaves privadas)
+  - Arquivos sensíveis (.env, .bash_history, configs)
+  - Score de risco para ajudar a decidir se é seguro clonar
 - **Interface Gráfica Moderna**: Uma interface intuitiva construída com PySide6, com tema escuro e uma janela de configurações organizada em abas.
 - **Relatórios Profissionais**: Exporte os resultados para arquivos Excel (.xlsx) formatados ou para um resumo em PDF, que agora inclui um rodapé profissional com data, hora e número de página.
 - **Resumos com IA Contextual**: Integração com Ollama. A IA entende o status da análise (por exemplo: "Não Encontrado", "Limite de API Atingido") e fornece recomendações específicas para cada cenário.
@@ -162,12 +164,12 @@ As chaves abaixo não são obrigatórias, mas enriquecem enormemente a análise,
 -   **Shodan:** Busca por portas abertas, vulnerabilidades (CVEs) e outros detalhes de infraestrutura de IPs.
 -   **URLHaus:** Verifica se uma URL está listada em sua base de dados de URLs maliciosas.
 -   **MalwareBazaar:** Verifica o hash de arquivos contra sua base de dados de amostras de malware.
+-   **GitHub/GitLab:** Necessárias para a análise de repositórios públicos, usadas para verificar segredos expostos, arquivos sensíveis e calcular o score de risco.
 
 > Se uma chave opcional não for fornecida, o programa continuará funcionando normalmente, e as colunas correspondentes no relatório simplesmente não serão preenchidas.
 
 #### IA Local (Opcional)
 -   **Ollama:** Para usar a funcionalidade de resumo com Inteligência Artificial, você precisa ter o [Ollama](https://ollama.com/) instalado e em execução no seu computador. O endpoint padrão (`http://localhost:11434/api/generate`) já vem configurado.
-
 
 ## Como Usar
 
@@ -177,10 +179,9 @@ A ferramenta possui dois fluxos de análise principais.
 |----------------------------|------------|
 | Analisar IPs e URLs        | Cole os indicadores na caixa de texto, um por linha, ou use o botão "Importar Alvos de Arquivo". Em seguida, clique no botão verde "Analisar Alvos". |
 | Analisar arquivos locais   | Clique em "Verificar Reputação de Arquivos" e selecione um ou mais arquivos do seu computador. |
+| Analisar repositórios      | Cole a URL de um repositório público do GitHub/GitLab na aba de Análise de Repositórios. |
 
 Após qualquer análise, a aba **Resumo Gerado por IA** pode ser usada para gerar relatórios em texto ou PDF.
-
-
 
 ## Contribuição
 
@@ -189,8 +190,6 @@ Este é um projeto de código aberto e contribuições são muito bem-vindas. Se
 ## Licença
 
 Este projeto é distribuído sob a Licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
-
 
 <a id="apoie-o-projeto"></a>
 <div align="right">
@@ -209,6 +208,3 @@ Este projeto é distribuído sob a Licença MIT. Veja o arquivo `LICENSE` para m
     </tr>
   </table>
 </div>
-
-
-
