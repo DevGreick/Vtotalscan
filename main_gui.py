@@ -17,7 +17,8 @@ from PySide6.QtCore import Qt, QThread, Signal
 
 from api_client import ApiClient
 from report_generator import ReportGenerator
-from utils import parse_targets, calculate_sha256, resource_path, defang_ioc
+from repository_analyzer import RepositoryAnalyzer
+from utils import parse_targets, calculate_sha256, resource_path, defang_ioc, parse_repo_urls
 
 def setup_logging():
     log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(module)s:%(lineno)d] - %(message)s')
@@ -85,7 +86,7 @@ class AnalysisWorker(QThread):
                     processed_count += 1
                     self.progress_update.emit(processed_count, total_targets)
 
-            self.results = {'ips': all_ip_results, 'urls': all_url_results, 'files': {}}
+            self.results = {'ips': all_ip_results, 'urls': all_url_results, 'repositories': []}
             reporter = ReportGenerator(all_ip_results, all_url_results)
             reporter.generate_excel(self.filepath)
             self.finished.emit(True, self.filepath)
@@ -140,13 +141,55 @@ class FileAnalysisWorker(QThread):
                     processed_count += 1
                     self.progress_update.emit(processed_count, total_files)
 
-            self.results = {'ips': {}, 'urls': {}, 'files': all_file_results}
+            self.results = {'ips': {}, 'urls': {}, 'files': all_file_results, 'repositories': []}
             reporter = ReportGenerator({}, {}, all_file_results)
             reporter.generate_excel(self.save_path)
             self.finished.emit(True, self.save_path)
         except Exception as e:
             logging.error(f"ERRO CRÍTICO NA THREAD DE ANÁLISE DE ARQUIVOS: {e}", exc_info=True)
             self.log_message.emit(f"ERRO CRÍTICO NA ANÁLISE DE ARQUIVOS. Veja threatspy.log para detalhes.")
+            self.finished.emit(False, "")
+
+class RepoAnalysisWorker(QThread):
+    finished = Signal(bool, str)
+    log_message = Signal(str)
+    progress_update = Signal(int, int)
+
+    def __init__(self, repo_urls, save_path):
+        super().__init__()
+        self.repo_urls = repo_urls
+        self.save_path = save_path
+        self.results = None
+
+    def run(self):
+        try:
+            api_client = ApiClient()
+            total_repos = len(self.repo_urls)
+            processed_count = 0
+            all_repo_results = []
+            self.progress_update.emit(0, total_repos)
+
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                future_to_url = {executor.submit(RepositoryAnalyzer(url, api_client).run_analysis): url for url in self.repo_urls}
+                
+                for future in as_completed(future_to_url):
+                    url = future_to_url[future]
+                    try:
+                        repo_results = future.result()
+                        all_repo_results.append(repo_results)
+                        self.log_message.emit(f"Repositório {url} analisado.")
+                    except Exception as exc:
+                        logging.error(f"Erro ao processar o repositório {url}: {exc}", exc_info=True)
+                    processed_count += 1
+                    self.progress_update.emit(processed_count, total_repos)
+            
+            self.results = {'ips': {}, 'urls': {}, 'files': {}, 'repositories': all_repo_results}
+            reporter = ReportGenerator({}, {}, {}, all_repo_results)
+            reporter.generate_excel(self.save_path)
+            self.finished.emit(True, self.save_path)
+        except Exception as e:
+            logging.error(f"ERRO CRÍTICO NA THREAD DE ANÁLISE DE REPOSITÓRIO: {e}", exc_info=True)
+            self.log_message.emit("ERRO CRÍTICO NA ANÁLISE DE REPOSITÓRIO. Veja threatspy.log para detalhes.")
             self.finished.emit(False, "")
 
 class AISummaryWorker(QThread):
@@ -160,79 +203,32 @@ class AISummaryWorker(QThread):
     
     def run(self):
         self.log_message.emit("Preparando dossiê para análise da IA...")
-        if not self.analysis_data or (not self.analysis_data.get('ips') and not self.analysis_data.get('urls') and not self.analysis_data.get('files')):
+        if not any(self.analysis_data.values()):
             self.finished.emit("Erro: Nenhuma análise foi realizada ainda.")
             return
 
         facts = "Dossiê de Análise de Ameaças:\n\n"
-        malicious_indicators_exist = False
         
-        rate_limited_by_service = defaultdict(list)
-
-        files_data = self.analysis_data.get('files', {})
-        if files_data:
-            malicious_files, not_found_files, failed_files = [], [], []
-            for f_hash, res in files_data.items():
-                filename = res.get('filename', f_hash[:12])
-                vt_res, mb_res = res.get('virustotal'), res.get('malwarebazaar')
-                
-                is_malicious = (vt_res and not vt_res.get('error') and (vt_res.get('data',{}).get('attributes',{}).get('last_analysis_stats',{}).get('malicious',0) > 0)) or \
-                               (mb_res and mb_res.get('query_status') == 'ok' and (mb_res.get('data', [{}]) or [{}])[0].get('signature'))
-                is_not_found = (vt_res and vt_res.get('error') == 'Not Found') and (mb_res and mb_res.get('query_status') == 'hash_not_found')
-                
-                if is_malicious: malicious_files.append(filename)
-                elif is_not_found: not_found_files.append(filename)
-                elif not (vt_res and mb_res): failed_files.append(filename)
-                
-                if vt_res and vt_res.get('error') == 'Rate Limit': rate_limited_by_service['VirusTotal'].append(filename)
-                if mb_res and mb_res.get('error') == 'Rate Limit': rate_limited_by_service['MalwareBazaar'].append(filename)
-
-            facts += f"**Análise de Arquivos ({len(files_data)} total):**\n"
-            if malicious_files: facts += f"- Maliciosos: {len(malicious_files)} ({', '.join(malicious_files)})\n"; malicious_indicators_exist = True
-            if not_found_files: facts += f"- Desconhecidos: {len(not_found_files)}\n"
-            if failed_files: facts += f"- Falhas (Outros Erros): {len(failed_files)}\n"
-
-        ips_data = self.analysis_data.get('ips', {})
-        if ips_data:
-            malicious_ips = []
-            for ip, res in ips_data.items():
-                vt_res = res.get('virustotal')
-                if (vt_res and not vt_res.get('error') and (vt_res.get('data',{}).get('attributes',{}).get('last_analysis_stats',{}).get('malicious',0) > 0)):
-                    malicious_ips.append(ip)
-                if vt_res and vt_res.get('error') == 'Rate Limit': rate_limited_by_service['VirusTotal'].append(ip)
-            
-            facts += f"**Análise de IPs ({len(ips_data)} total):**\n"
-            if malicious_ips: facts += f"- Maliciosos: {len(malicious_ips)} ({', '.join(malicious_ips)})\n"; malicious_indicators_exist = True
+        repo_data = self.analysis_data.get('repositories', [])
+        if repo_data:
+            facts += f"**Análise de Repositórios ({len(repo_data)} total):**\n"
+            for repo in repo_data:
+                facts += f"- Repositório: {repo.get('url')}\n"
+                facts += f"  - Nível de Risco Estático: {repo.get('risk_score', 0)}/100\n"
+                if secrets := repo.get('exposed_secrets'):
+                    facts += f"  - Segredos Expostos: {len(secrets)} encontrados.\n"
+                if files := repo.get('suspicious_files'):
+                    facts += f"  - Arquivos Suspeitos: {len(files)} ({', '.join(files)})\n"
+            facts += "\n"
         
-        urls_data = self.analysis_data.get('urls', {})
-        if urls_data:
-            malicious_urls = []
-            for url, res in urls_data.items():
-                vt_res = res.get('virustotal')
-                is_mal_vt = vt_res and not vt_res.get('error') and (vt_res.get('data',{}).get('attributes',{}).get('stats',{}).get('malicious',0) > 0)
-                uh_res = res.get('urlhaus')
-                is_mal_uh = uh_res and uh_res.get('query_status') == 'ok' and uh_res.get('url_status') == 'online'
-                if is_mal_vt or is_mal_uh: malicious_urls.append(url)
-                if vt_res and vt_res.get('error') == 'Rate Limit': rate_limited_by_service['VirusTotal'].append(defang_ioc(url))
-            
-            facts += f"**Análise de URLs ({len(urls_data)} total):**\n"
-            if malicious_urls: facts += f"- Maliciosas: {len(malicious_urls)} ({', '.join(defang_ioc(u) for u in malicious_urls)})\n"; malicious_indicators_exist = True
-
-        if rate_limited_by_service:
-            facts += "\n**Falhas por Limite de API:**\n"
-            for service, items in rate_limited_by_service.items():
-                facts += f"- {service}: {len(items)} indicadores afetados ({', '.join(items[:3])}{'...' if len(items) > 3 else ''})\n"
-
         prompt = (f"Você é um analista de cibersegurança. Sua tarefa é gerar um relatório estruturado com base no dossiê abaixo.\n\n"
                   f"ESTRUTURA OBRIGATÓRIA DO RELATÓRIO:\n"
                   f"### Análise Geral\n"
-                  f"(Um parágrafo resumindo os achados de TODAS as categorias: IPs, URLs e Arquivos).\n\n"
+                  f"(Um parágrafo resumindo os achados mais críticos de TODAS as categorias analisadas).\n\n"
                   f"### Recomendações para Indicadores Maliciosos\n"
-                  f"(Crie subseções APENAS para as categorias com indicadores maliciosos e liste as recomendações).\n\n"
-                  f"### Recomendações para Falhas de Análise\n"
-                  f"(Se houverem 'Falhas por Limite de API', explique que a cota da API para o serviço específico (ex: VirusTotal) foi atingida. Recomende aguardar um período antes de reanalisar os itens afetados por aquele serviço).\n\n"
+                  f"(Crie subseções para cada categoria com achados e liste as recomendações).\n\n"
                   f"### Conclusão e Próximos Passos\n"
-                  f"(Um parágrafo final com as ações mais importantes, incluindo o que fazer com indicadores 'Desconhecidos').\n\n"
+                  f"(Um parágrafo final com as ações mais importantes).\n\n"
                   f"IMPORTANTE: Não adicione assinaturas, cargos ou data.\n\n"
                   f"--- INÍCIO DO DOSSIÊ ---\n{facts}\n--- FIM DO DOSSIÊ ---")
         
@@ -257,6 +253,8 @@ class SettingsDialog(QDialog):
         self.urlhaus_key_entry = QLineEdit()
         self.shodan_key_entry = QLineEdit()
         self.mb_key_entry = QLineEdit()
+        self.github_key_entry = QLineEdit()
+        self.gitlab_key_entry = QLineEdit()
         self.ollama_endpoint_entry = QLineEdit()
 
         tab_widget.addTab(self.create_ollama_tab(), "Ollama")
@@ -265,6 +263,8 @@ class SettingsDialog(QDialog):
         tab_widget.addTab(self.create_api_tab("URLHaus", "https://urlhaus.abuse.ch/api/", self.urlhaus_key_entry, link_style), "URLHaus")
         tab_widget.addTab(self.create_api_tab("Shodan", "https://account.shodan.io/register", self.shodan_key_entry, link_style), "Shodan")
         tab_widget.addTab(self.create_api_tab("MalwareBazaar", "https://bazaar.abuse.ch/account/", self.mb_key_entry, link_style), "MalwareBazaar")
+        tab_widget.addTab(self.create_api_tab("GitHub", "https://github.com/settings/tokens", self.github_key_entry, link_style), "GitHub")
+        tab_widget.addTab(self.create_api_tab("GitLab", "https://gitlab.com/-/profile/personal_access_tokens", self.gitlab_key_entry, link_style), "GitLab")
         
         main_layout.addWidget(tab_widget)
         
@@ -317,6 +317,8 @@ class SettingsDialog(QDialog):
         if key := keyring.get_password("vtotalscan", "urlhaus_api_key"): self.urlhaus_key_entry.setText(key)
         if key := keyring.get_password("vtotalscan", "shodan_api_key"): self.shodan_key_entry.setText(key)
         if key := keyring.get_password("vtotalscan", "malwarebazaar_api_key"): self.mb_key_entry.setText(key)
+        if key := keyring.get_password("vtotalscan", "github_api_key"): self.github_key_entry.setText(key)
+        if key := keyring.get_password("vtotalscan", "gitlab_api_key"): self.gitlab_key_entry.setText(key)
         
         config = configparser.ConfigParser()
         config.read('API_KEY.ini')
@@ -329,6 +331,8 @@ class SettingsDialog(QDialog):
             if key := self.urlhaus_key_entry.text().strip(): keyring.set_password("vtotalscan", "urlhaus_api_key", key)
             if key := self.shodan_key_entry.text().strip(): keyring.set_password("vtotalscan", "shodan_api_key", key)
             if key := self.mb_key_entry.text().strip(): keyring.set_password("vtotalscan", "malwarebazaar_api_key", key)
+            if key := self.github_key_entry.text().strip(): keyring.set_password("vtotalscan", "github_api_key", key)
+            if key := self.gitlab_key_entry.text().strip(): keyring.set_password("vtotalscan", "gitlab_api_key", key)
             
             config = configparser.ConfigParser()
             config.read('API_KEY.ini')
@@ -347,41 +351,56 @@ class VtotalscanGUI(QMainWindow):
         super().__init__()
         self.last_ioc_results = None
         self.last_file_results = None
-        self.setWindowTitle("ThreatSpy v1.0 by SecZeroR")
+        self.last_repo_results = None
+        self.setWindowTitle("ThreatSpy by SecZeroR")
         self.setFixedSize(700, 950)
-        try:
-            self.setWindowIcon(QIcon(resource_path("spy2.ico")))
-        except Exception as e:
-            logging.error(f"Erro ao carregar ícone da janela principal: {e}")
-        central_widget = QWidget(); self.setCentralWidget(central_widget); main_layout = QVBoxLayout(central_widget); header_layout = QHBoxLayout()
+        try: self.setWindowIcon(QIcon(resource_path("spy2.ico")))
+        except Exception as e: logging.error(f"Erro ao carregar ícone: {e}")
+        central_widget = QWidget(); self.setCentralWidget(central_widget); main_layout = QVBoxLayout(central_widget)
+        
+        header_layout = QHBoxLayout()
         logo_label = QLabel(); pixmap = QPixmap(resource_path("spy2-1.png")).scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation); logo_label.setPixmap(pixmap)
         title_label = QLabel("ThreatSpy"); title_label.setFont(QFont("Segoe UI", 20, QFont.Bold))
         btn_config = QPushButton("Configurações"); btn_config.setIcon(QIcon(resource_path("gear.png"))); btn_config.clicked.connect(self.open_settings_window)
         header_layout.addWidget(logo_label); header_layout.addWidget(title_label); header_layout.addStretch(); header_layout.addWidget(btn_config)
-        input_label = QLabel("Insira os Alvos (IPs ou URLs, um por linha)"); input_label.setFont(QFont("Segoe UI", 10, QFont.Bold)); self.text_area = QTextEdit()
-        
-        action_bar_layout = QHBoxLayout()
-        btn_load = QPushButton("Importar Alvos de Arquivo")
-        btn_load.clicked.connect(self.select_file)
-        btn_scan_files = QPushButton("Verificar Reputação de Arquivos")
-        btn_scan_files.clicked.connect(self.start_file_analysis)
-        btn_clear = QPushButton("Limpar Alvos")
-        btn_clear.clicked.connect(self.clear_text)
-        action_bar_layout.addWidget(btn_load)
-        action_bar_layout.addWidget(btn_scan_files)
-        action_bar_layout.addWidget(btn_clear)
-        
-        self.btn_scan_iocs = QPushButton("Analisar Alvos")
-        self.btn_scan_iocs.setStyleSheet("background-color: #03A062; color: white; font-weight: bold;")
-        self.btn_scan_iocs.setFixedHeight(40)
-        self.btn_scan_iocs.setFont(QFont("Segoe UI", 10, QFont.Bold))
-        self.btn_scan_iocs.clicked.connect(self.start_ioc_analysis)
-        
         main_layout.addLayout(header_layout)
-        main_layout.addWidget(input_label)
-        main_layout.addWidget(self.text_area, 1)
-        main_layout.addLayout(action_bar_layout)
-        main_layout.addWidget(self.btn_scan_iocs)
+
+        self.tab_view_main = QTabWidget()
+        main_layout.addWidget(self.tab_view_main, 1)
+
+        repo_tab = QWidget()
+        repo_layout = QVBoxLayout(repo_tab)
+        repo_label = QLabel("Insira as URLs dos Repositórios (uma por linha)"); repo_label.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        self.repo_url_input = QTextEdit()
+        self.repo_url_input.setPlaceholderText("https://github.com/owner/repo\nhttps://gitlab.com/owner/repo")
+        
+        repo_action_layout = QHBoxLayout()
+        btn_load_repos = QPushButton("Importar de Arquivo")
+        btn_load_repos.clicked.connect(self.select_repo_file)
+        btn_clear_repos = QPushButton("Limpar")
+        btn_clear_repos.clicked.connect(self.clear_repo_input)
+        repo_action_layout.addWidget(btn_load_repos)
+        repo_action_layout.addWidget(btn_clear_repos)
+        repo_action_layout.addStretch()
+
+        self.btn_scan_repo = QPushButton("Analisar Repositórios"); self.btn_scan_repo.setStyleSheet("background-color: #2980b9; color: white; font-weight: bold;"); self.btn_scan_repo.setFixedHeight(40); self.btn_scan_repo.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        self.btn_scan_repo.clicked.connect(self.start_repo_analysis)
+        repo_layout.addWidget(repo_label); repo_layout.addWidget(self.repo_url_input, 1); repo_layout.addLayout(repo_action_layout); repo_layout.addWidget(self.btn_scan_repo)
+        self.tab_view_main.addTab(repo_tab, "Análise de Repositório")
+
+        ioc_tab = QWidget()
+        ioc_layout = QVBoxLayout(ioc_tab)
+        input_label = QLabel("Insira os Alvos (IPs ou URLs, um por linha)"); input_label.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        self.text_area = QTextEdit()
+        self.text_area.setPlaceholderText("8.8.8.8\n185.172.128.150\ngoogle.com\nhttps://some-random-domain.net/path")
+        action_bar_layout = QHBoxLayout()
+        btn_load = QPushButton("Importar Alvos de Arquivo"); btn_load.clicked.connect(self.select_file)
+        btn_scan_files = QPushButton("Verificar Reputação de Arquivos"); btn_scan_files.clicked.connect(self.start_file_analysis)
+        btn_clear = QPushButton("Limpar"); btn_clear.clicked.connect(self.clear_text)
+        action_bar_layout.addWidget(btn_load); action_bar_layout.addWidget(btn_scan_files); action_bar_layout.addWidget(btn_clear)
+        self.btn_scan_iocs = QPushButton("Analisar Alvos"); self.btn_scan_iocs.setStyleSheet("background-color: #03A062; color: white; font-weight: bold;"); self.btn_scan_iocs.setFixedHeight(40); self.btn_scan_iocs.setFont(QFont("Segoe UI", 10, QFont.Bold)); self.btn_scan_iocs.clicked.connect(self.start_ioc_analysis)
+        ioc_layout.addWidget(input_label); ioc_layout.addWidget(self.text_area, 1); ioc_layout.addLayout(action_bar_layout); ioc_layout.addWidget(self.btn_scan_iocs)
+        self.tab_view_main.addTab(ioc_tab, "Análise de IOCs")
         
         self.tab_view = QTabWidget(); self.log_console = QTextEdit(); self.log_console.setReadOnly(True); self.ai_summary_box = QTextEdit(); self.ai_summary_box.setReadOnly(True)
         self.tab_view.addTab(self.log_console, "Console de Atividade"); self.tab_view.addTab(self.ai_summary_box, "Resumo Gerado por IA")
@@ -393,9 +412,7 @@ class VtotalscanGUI(QMainWindow):
         self.load_models_async(); self.check_api_key_on_startup()
     
     def open_settings_window(self):
-        if SettingsDialog(self).exec():
-            self.api_client = ApiClient()
-            self.load_models_async()
+        if SettingsDialog(self).exec(): self.load_models_async()
 
     def check_api_key_on_startup(self):
         if not keyring.get_password("vtotalscan", "virustotal_api_key"):
@@ -422,29 +439,68 @@ class VtotalscanGUI(QMainWindow):
                 logging.error(f"Não foi possível ler o arquivo: {filepath} - {e}", exc_info=True)
                 QMessageBox.critical(self, "Erro", f"Não foi possível ler o arquivo:\n{e}")
     
+    def select_repo_file(self):
+        filepath, _ = QFileDialog.getOpenFileName(self, "Selecionar arquivo de texto com URLs de repositórios", "", "Arquivos de Texto (*.txt);;Todos os Arquivos (*)")
+        if filepath:
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f: self.repo_url_input.setPlainText(f.read())
+                self.log(f"Conteúdo de '{os.path.basename(filepath)}' carregado para análise de repositório.")
+            except Exception as e:
+                logging.error(f"Não foi possível ler o arquivo: {filepath} - {e}", exc_info=True)
+                QMessageBox.critical(self, "Erro", f"Não foi possível ler o arquivo:\n{e}")
+
     def clear_text(self):
         self.text_area.clear()
-        self.log_console.clear()
-        self.log("Área de alvos e console limpos.")
+        self.log("Área de alvos limpa.")
+    
+    def clear_repo_input(self):
+        self.repo_url_input.clear()
+        self.log("Área de repositórios limpa.")
     
     def log(self, message):
         timestamp = time.strftime('%H:%M:%S')
         self.log_console.append(f"[{timestamp}] >> {message}")
     
+    def start_repo_analysis(self):
+        input_text = self.repo_url_input.toPlainText()
+        repo_urls, invalid_lines = parse_repo_urls(input_text)
+
+        if invalid_lines:
+            ignored_text = "\n".join(f"- {line}" for line in invalid_lines)
+            QMessageBox.warning(
+                self, 
+                "Entradas Inválidas Ignoradas",
+                f"As seguintes entradas não são URLs de repositório (GitHub/GitLab) válidas e foram ignoradas:\n\n{ignored_text}"
+            )
+
+        if not repo_urls:
+            self.log("Nenhuma URL de repositório válida foi fornecida.")
+            QMessageBox.warning(self, "Nenhum Alvo Válido", "Nenhuma URL de repositório válida foi encontrada para análise.")
+            return
+
+        save_path, _ = QFileDialog.getSaveFileName(self, "Salvar Relatório de Análise", "Analise_Repositorios.xlsx", "Arquivos Excel (*.xlsx)")
+        if not save_path:
+            self.log("Operação de salvar cancelada.")
+            return
+            
+        self.log(f"Análise de {len(repo_urls)} repositório(s) iniciada...")
+        self.progress_dialog = QProgressDialog("Analisando repositórios...", "Cancelar", 0, len(repo_urls), self)
+        self.progress_dialog.setWindowTitle("Aguarde"); self.progress_dialog.setWindowModality(Qt.WindowModal)
+        self.repo_thread = RepoAnalysisWorker(repo_urls, save_path)
+        self.progress_dialog.canceled.connect(self.repo_thread.requestInterruption)
+        self.repo_thread.log_message.connect(self.log)
+        self.repo_thread.progress_update.connect(self.update_progress_dialog)
+        self.repo_thread.finished.connect(self.on_analysis_finished)
+        self.repo_thread.start()
+        self.progress_dialog.show()
+
     def start_ioc_analysis(self):
         filepath, _ = QFileDialog.getSaveFileName(self, "Salvar Relatório Excel", "Analise_IOCs.xlsx", "Arquivos Excel (*.xlsx)")
         if not filepath:
             self.log("Operação de salvar cancelada.")
             return
 
-        try:
-            with open(filepath, 'a'): pass
-        except PermissionError:
-            QMessageBox.warning(self, "Arquivo em Uso", f"Não foi possível obter permissão para salvar o relatório em '{os.path.basename(filepath)}'.\n\nVerifique se o arquivo não está aberto e tente novamente.")
-            self.log(f"Análise cancelada. O arquivo de relatório '{filepath}' está em uso.")
-            return
-
-        self.progress_dialog = QProgressDialog("Análise em progresso...", "Cancelar", 0, 100, self)
+        self.progress_dialog = QProgressDialog("Análise de IOCs em progresso...", "Cancelar", 0, 100, self)
         self.progress_dialog.setWindowTitle("Aguarde"); self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.analysis_thread = AnalysisWorker(self.text_area.toPlainText(), filepath)
         self.progress_dialog.canceled.connect(self.analysis_thread.requestInterruption)
@@ -458,33 +514,12 @@ class VtotalscanGUI(QMainWindow):
             self.log("Nenhum arquivo selecionado.")
             return
 
-        locked_files = []
-        for fpath in filepaths:
-            try:
-                with open(fpath, 'rb') as f: pass 
-            except (IOError, PermissionError):
-                locked_files.append(os.path.basename(fpath))
-
-        if locked_files:
-            files_str = "\n".join(locked_files)
-            QMessageBox.warning(self, "Arquivos Bloqueados",
-                                f"Não foi possível acessar os seguintes arquivos de entrada:\n\n{files_str}\n\nPor favor, feche os programas que os estão utilizando e tente novamente.")
-            self.log(f"Análise cancelada. Arquivos de entrada bloqueados: {', '.join(locked_files)}")
-            return
-
         save_path, _ = QFileDialog.getSaveFileName(self, "Salvar Relatório de Arquivos", "Analise_Arquivos.xlsx", "Arquivos Excel (*.xlsx)")
         if not save_path:
             self.log("Operação de salvar cancelada.")
             return
-        
-        try:
-            with open(save_path, 'a'): pass
-        except PermissionError:
-            QMessageBox.warning(self, "Arquivo em Uso", f"Não foi possível obter permissão para salvar o relatório em '{os.path.basename(save_path)}'.\n\nVerifique se o arquivo não está aberto no Excel e tente novamente.")
-            self.log(f"Análise cancelada. O arquivo de relatório '{save_path}' está em uso.")
-            return
 
-        self.progress_dialog = QProgressDialog("Análise de arquivos...", "Cancelar", 0, 100, self)
+        self.progress_dialog = QProgressDialog("Análise de arquivos em progresso...", "Cancelar", 0, 100, self)
         self.progress_dialog.setWindowTitle("Aguarde"); self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.file_thread = FileAnalysisWorker(filepaths, save_path)
         self.progress_dialog.canceled.connect(self.file_thread.requestInterruption)
@@ -493,18 +528,22 @@ class VtotalscanGUI(QMainWindow):
         self.progress_dialog.show()
 
     def update_progress_dialog(self, current, total):
-        self.progress_dialog.setMaximum(total); self.progress_dialog.setValue(current); self.progress_dialog.setLabelText(f"Analisando {current} de {total}...")
+        if hasattr(self, 'progress_dialog') and self.progress_dialog.isVisible():
+            self.progress_dialog.setMaximum(total); self.progress_dialog.setValue(current); self.progress_dialog.setLabelText(f"Analisando {current} de {total}...")
     
     def on_analysis_finished(self, success, filepath):
-        self.progress_dialog.close()
+        if hasattr(self, 'progress_dialog'): self.progress_dialog.close()
+        
         sender_thread = self.sender()
         if filepath == "NO_TARGETS":
             QMessageBox.warning(self, "Aviso", "Nenhum IP ou URL válido foi encontrado."); self.log("Nenhum alvo válido.")
         elif success and filepath:
             if isinstance(sender_thread, AnalysisWorker): self.last_ioc_results = sender_thread.results
             elif isinstance(sender_thread, FileAnalysisWorker): self.last_file_results = sender_thread.results
+            elif isinstance(sender_thread, RepoAnalysisWorker): self.last_repo_results = sender_thread.results
             
-            if self.last_ioc_results or self.last_file_results: self.btn_ai_summary.setEnabled(True); self.btn_ai_summary_pdf.setEnabled(True)
+            if self.last_ioc_results or self.last_file_results or self.last_repo_results:
+                self.btn_ai_summary.setEnabled(True); self.btn_ai_summary_pdf.setEnabled(True)
 
             self.log(f"Relatório salvo em: {filepath}")
             msg_box = QMessageBox(self); msg_box.setWindowTitle("Concluído"); msg_box.setTextFormat(Qt.RichText); msg_box.setText(f"<p>Análise concluída!</p><p>Relatório salvo em:</p><p><a href='{Path(filepath).as_uri()}'>{filepath}</a></p>"); msg_box.exec()
@@ -512,34 +551,31 @@ class VtotalscanGUI(QMainWindow):
             self.log("A análise falhou ou foi cancelada.")
     
     def start_ai_task(self):
-        if not ApiClient().ai_endpoint:
-            QMessageBox.warning(self, "Configuração Necessária", "O endpoint da IA não foi configurado. Por favor, vá em 'Configurações' para adicioná-lo.")
-            return
-        if not self.last_ioc_results and not self.last_file_results:
+        if not self.last_ioc_results and not self.last_file_results and not self.last_repo_results:
             QMessageBox.warning(self, "Aviso", "Realize uma análise primeiro."); return
         
         combined_results = {
             "ips": self.last_ioc_results.get('ips', {}) if self.last_ioc_results else {},
             "urls": self.last_ioc_results.get('urls', {}) if self.last_ioc_results else {},
-            "files": self.last_file_results.get('files', {}) if self.last_file_results else {}
+            "files": self.last_file_results.get('files', {}) if self.last_file_results else {},
+            "repositories": self.last_repo_results.get('repositories', []) if self.last_repo_results else []
         }
         
         self.btn_ai_summary.setEnabled(False); self.btn_ai_summary_pdf.setEnabled(False); self.ai_summary_box.setPlainText("Analisando com IA...")
         self.ai_thread = AISummaryWorker(combined_results, self.selected_model.currentText()); self.ai_thread.log_message.connect(self.log); self.ai_thread.finished.connect(self.on_ai_finished); self.ai_thread.start()
     
     def start_ai_task_pdf(self):
-        if not ApiClient().ai_endpoint:
-            QMessageBox.warning(self, "Configuração Necessária", "O endpoint da IA não foi configurado. Por favor, vá em 'Configurações' para adicioná-lo.")
-            return
-        if not self.last_ioc_results and not self.last_file_results:
+        if not self.last_ioc_results and not self.last_file_results and not self.last_repo_results:
             QMessageBox.warning(self, "Aviso", "Realize uma análise primeiro para gerar o PDF."); return
             
         filepath, _ = QFileDialog.getSaveFileName(self, "Salvar Resumo em PDF", "Resumo_IA.pdf", "Arquivos PDF (*.pdf)")
         if not filepath: self.log("Operação cancelada."); return
         
         combined_results = {
-            "ips": self.last_ioc_results.get('ips', {}) if self.last_ioc_results else {}, "urls": self.last_ioc_results.get('urls', {}) if self.last_ioc_results else {},
-            "files": self.last_file_results.get('files', {}) if self.last_file_results else {}
+            "ips": self.last_ioc_results.get('ips', {}) if self.last_ioc_results else {},
+            "urls": self.last_ioc_results.get('urls', {}) if self.last_ioc_results else {},
+            "files": self.last_file_results.get('files', {}) if self.last_file_results else {},
+            "repositories": self.last_repo_results.get('repositories', []) if self.last_repo_results else []
         }
 
         self.btn_ai_summary.setEnabled(False); self.btn_ai_summary_pdf.setEnabled(False); self.ai_summary_box.setPlainText("Gerando PDF com IA...")
@@ -554,7 +590,8 @@ class VtotalscanGUI(QMainWindow):
             ips_data = self.last_ioc_results.get('ips', {}) if self.last_ioc_results else {}
             urls_data = self.last_ioc_results.get('urls', {}) if self.last_ioc_results else {}
             files_data = self.last_file_results.get('files', {}) if self.last_file_results else {}
-            reporter = ReportGenerator(ips_data, urls_data, files_data)
+            repo_data = self.last_repo_results.get('repositories', []) if self.last_repo_results else []
+            reporter = ReportGenerator(ips_data, urls_data, files_data, repo_data)
             reporter.generate_pdf_summary(filepath, summary)
 
             self.log(f"Resumo PDF salvo em: {filepath}")
