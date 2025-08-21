@@ -7,7 +7,7 @@ import datetime
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
-from reportlab.lib.colors import navy, red, black, lightgrey, whitesmoke, grey
+from reportlab.lib.colors import navy, red, black, lightgrey, whitesmoke, grey, blue, white
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -193,7 +193,7 @@ class ReportGenerator:
             styles = getSampleStyleSheet()
             styles.add(ParagraphStyle(name='Justify', fontName=font_name, alignment=TA_JUSTIFY, fontSize=10, leading=12))
             styles.add(ParagraphStyle(name='TableCell', fontName=font_name, fontSize=8, leading=10, alignment=TA_LEFT))
-            styles.add(ParagraphStyle(name='TableCellBold', fontName=font_name_bold, fontSize=8, leading=10, alignment=TA_LEFT))
+            styles.add(ParagraphStyle(name='TableCellBold', fontName=font_name_bold, fontSize=8, leading=10, alignment=TA_LEFT, textColor=white))
             styles['h1'].fontName = font_name_bold; styles['h2'].fontName = font_name_bold; styles['h3'].fontName = font_name_bold; styles['Normal'].fontName = font_name
             story = []
             
@@ -220,7 +220,7 @@ class ReportGenerator:
             if self.url_results_dict: summary_data.extend([['Total de URLs analisadas', str(len(self.url_results_dict))], ['URLs maliciosas (VT)', str(len(malicious_urls_vt))]])
             if self.file_results_dict: summary_data.extend([['Total de arquivos analisados', str(len(self.file_results_dict))], ['Arquivos maliciosos (VT)', str(len(malicious_files_vt))]])
             
-            summary_table = Table(summary_data, colWidths=[2.5*inch, 4.5*inch]); summary_table.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,0), navy), ('TEXTCOLOR',(0,0),(-1,0), (1,1,1)), ('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('FONTNAME', (0,0), (-1,0), font_name_bold), ('BOTTOMPADDING', (0,0), (-1,0), 12), ('BACKGROUND', (0,1), (-1,-1), (0.9, 0.9, 0.9)), ('GRID', (0,0), (-1,-1), 1, (0.7,0.7,0.7))]))
+            summary_table = Table(summary_data, colWidths=[2.5*inch, 4.5*inch]); summary_table.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,0), navy), ('TEXTCOLOR',(0,0),(-1,0), white), ('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('FONTNAME', (0,0), (-1,0), font_name_bold), ('BOTTOMPADDING', (0,0), (-1,0), 12), ('BACKGROUND', (0,1), (-1,-1), (0.9, 0.9, 0.9)), ('GRID', (0,0), (-1,-1), 1, (0.7,0.7,0.7))]))
             story.append(summary_table); story.append(Spacer(1, 0.2*inch))
 
             if malicious_ips_vt or malicious_urls_vt or malicious_files_vt:
@@ -266,7 +266,8 @@ class ReportGenerator:
                     elif line.strip().startswith('## '): story.append(Paragraph(line.strip().lstrip('# ').strip(), styles['h2']))
                     elif line.strip().startswith('# '): story.append(Paragraph(line.strip().lstrip('# ').strip(), styles['h1']))
                     elif line.strip().startswith(('-', '•')) or (line.strip().startswith(('1', '2', '3', '4', '5', '6', '7', '8', '9')) and line[1:3] in ('. ', ' ')):
-                        p_text = f"&nbsp;&nbsp;&nbsp;•&nbsp;{re.sub(r'^[0-9-•.]+\s*', '', line.strip())}"
+                        cleaned_line = re.sub(r'^[0-9-•.]+\s*', '', line.strip())
+                        p_text = f"&nbsp;&nbsp;&nbsp;•&nbsp;{cleaned_line}"
                         story.append(Paragraph(p_text, styles['Normal']))
                     else: story.append(Paragraph(line, styles['Justify']))
                 i += 1
@@ -274,22 +275,56 @@ class ReportGenerator:
 
             story.append(Paragraph("<b>Relatório Detalhado de Indicadores Analisados</b>", styles['h2']))
             story.append(Spacer(1, 0.1*inch))
-            table_style = TableStyle([('BACKGROUND', (0,0), (-1,0), navy), ('TEXTCOLOR',(0,0),(-1,0), whitesmoke), ('ALIGN', (0,0), (-1,-1), 'LEFT'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('FONTNAME', (0,0), (-1,0), font_name_bold), ('FONTSIZE', (0,0), (-1,0), 9), ('BOTTOMPADDING', (0,0), (-1,0), 10), ('BACKGROUND', (0,1), (-1,-1), whitesmoke), ('GRID', (0,0), (-1,-1), 1, lightgrey), ('ROWBACKGROUNDS', (0,1), (-1,-1), [whitesmoke, (0.9,0.9,0.9)])])
+            
+            # Style for the header-row based tables (IPs, URLs, Files)
+            other_tables_style = TableStyle([
+                ('BACKGROUND', (0,0), (-1,0), navy), 
+                ('TEXTCOLOR',(0,0),(-1,0), white), 
+                ('ALIGN', (0,0), (-1,-1), 'LEFT'), 
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), 
+                ('FONTNAME', (0,0), (-1,0), font_name_bold), 
+                ('FONTSIZE', (0,0), (-1,0), 9), 
+                ('BOTTOMPADDING', (0,0), (-1,0), 10), 
+                ('BACKGROUND', (0,1), (-1,-1), whitesmoke), 
+                ('GRID', (0,0), (-1,-1), 1, lightgrey), 
+                ('ROWBACKGROUNDS', (0,1), (-1,-1), [whitesmoke, (0.9,0.9,0.9)])
+            ])
 
             if self.repo_results_dict:
                 story.append(Paragraph("<b>Repositórios Analisados</b>", styles['h3']))
+
                 for res in self.repo_results_dict:
                     secrets_str = "<br/>".join([f"• {s['type']} em {s['file']}" for s in res.get('exposed_secrets', [])]) or "Nenhum"
                     files_str = "<br/>".join([f"• {f}" for f in res.get('suspicious_files', [])]) or "Nenhum"
-
+                    
                     repo_table_data = [
                         [Paragraph('<b>URL</b>', styles['TableCellBold']), Paragraph(f'<a href="{res.get("url")}" color="blue">{res.get("url")}</a>', styles['TableCell'])],
                         [Paragraph('<b>Risco Estático</b>', styles['TableCellBold']), Paragraph(f'{res.get("risk_score", 0)}/100', styles['TableCell'])],
                         [Paragraph('<b>Arquivos Suspeitos</b>', styles['TableCellBold']), Paragraph(files_str, styles['TableCell'])],
                         [Paragraph('<b>Segredos Expostos</b>', styles['TableCellBold']), Paragraph(secrets_str, styles['TableCell'])]
                     ]
-                    repo_table = Table(repo_table_data, colWidths=[1.5*inch, 5.5*inch]); repo_table.setStyle(table_style)
-                    story.append(repo_table); story.append(Spacer(1, 0.2*inch))
+                    
+                    repo_table = Table(repo_table_data, colWidths=[1.5*inch, 5.5*inch])
+                    
+                    # New style specifically for the column-based repository table
+                    repo_table_style = TableStyle([
+                        # First column (the "Titles")
+                        ('BACKGROUND', (0,0), (0,-1), navy),
+                        ('TEXTCOLOR', (0,0), (0,-1), white), # This is respected by Paragraphs without their own color
+                        
+                        # Second column (the "Values")
+                        ('BACKGROUND', (1,0), (1,-1), whitesmoke),
+                        ('TEXTCOLOR', (1,0), (1,-1), black), # Values are black
+                        
+                        # General table styling
+                        ('GRID', (0,0), (-1,-1), 1, lightgrey),
+                        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                        ('FONTNAME', (0,0), (0,-1), font_name_bold), # Titles are bold
+                    ])
+                    repo_table.setStyle(repo_table_style)
+                    
+                    story.append(repo_table)
+                    story.append(Spacer(1, 0.2*inch))
 
             if self.ip_results_dict:
                 story.append(Paragraph("<b>IPs Analisados</b>", styles['h3']))
@@ -302,8 +337,11 @@ class ReportGenerator:
                     owner = vt_res.get('data', {}).get('attributes', {}).get('as_owner', 'N/A')
                     row_text = [Paragraph(f'<a href="https://www.virustotal.com/gui/ip-address/{ip}" color="blue">{defang_ioc(ip)}</a>', styles['TableCell']), Paragraph(str(vt_mal), styles['TableCell']), Paragraph(str(abuse_score), styles['TableCell']), Paragraph(country, styles['TableCell']), Paragraph(owner, styles['TableCell'])]
                     ip_table_data.append(row_text)
-                ip_table = Table(ip_table_data, colWidths=[1.2*inch, 0.6*inch, 0.8*inch, 0.5*inch, 3*inch]); ip_table.setStyle(table_style)
-                story.append(ip_table); story.append(Spacer(1, 0.2*inch))
+                
+                ip_table = Table(ip_table_data, colWidths=[1.2*inch, 0.6*inch, 0.8*inch, 0.5*inch, 3*inch])
+                ip_table.setStyle(other_tables_style)
+                story.append(ip_table)
+                story.append(Spacer(1, 0.2*inch))
 
             if self.url_results_dict:
                 story.append(Paragraph("<b>URLs Analisadas</b>", styles['h3']))
@@ -315,8 +353,11 @@ class ReportGenerator:
                     final_url = vt_res.get("meta", {}).get("url_info", {}).get("url", url); url_hash = hashlib.sha256(final_url.encode('utf-8')).hexdigest()
                     row_text = [Paragraph(f'<a href="https://www.virustotal.com/gui/url/{url_hash}" color="blue">{defang_ioc(url)}</a>', styles['TableCell']), Paragraph(str(vt_mal), styles['TableCell']), Paragraph(uh_status, styles['TableCell'])]
                     url_table_data.append(row_text)
-                url_table = Table(url_table_data, colWidths=[5.4*inch, 0.7*inch, 0.9*inch]); url_table.setStyle(table_style)
-                story.append(url_table); story.append(Spacer(1, 0.2*inch))
+
+                url_table = Table(url_table_data, colWidths=[5.4*inch, 0.7*inch, 0.9*inch])
+                url_table.setStyle(other_tables_style)
+                story.append(url_table)
+                story.append(Spacer(1, 0.2*inch))
 
             if self.file_results_dict:
                 story.append(Paragraph("<b>Arquivos Analisados</b>", styles['h3']))
@@ -340,8 +381,10 @@ class ReportGenerator:
                     
                     row_text = [Paragraph(defang_ioc(filename), styles['TableCell']), Paragraph(f'<a href="https://www.virustotal.com/gui/file/{f_hash}" color="blue">{f_hash[:20]}...</a>', styles['TableCell']), Paragraph(str(vt_mal), styles['TableCell']), Paragraph(threat_name or 'N/A', styles['TableCell'])]
                     file_table_data.append(row_text)
-                file_table = Table(file_table_data, colWidths=[2.3*inch, 2.3*inch, 0.7*inch, 1.7*inch]); file_table.setStyle(table_style)
-                story.append(file_table); story.append(Spacer(1, 0.2*inch))
+                file_table = Table(file_table_data, colWidths=[2.3*inch, 2.3*inch, 0.7*inch, 1.7*inch])
+                file_table.setStyle(other_tables_style)
+                story.append(file_table)
+                story.append(Spacer(1, 0.2*inch))
 
             doc.build(story, onFirstPage=self._draw_footer, onLaterPages=self._draw_footer)
         except Exception as e:

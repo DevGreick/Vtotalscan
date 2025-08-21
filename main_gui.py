@@ -86,7 +86,7 @@ class AnalysisWorker(QThread):
                     processed_count += 1
                     self.progress_update.emit(processed_count, total_targets)
 
-            self.results = {'ips': all_ip_results, 'urls': all_url_results, 'repositories': []}
+            self.results = {'ips': all_ip_results, 'urls': all_url_results}
             reporter = ReportGenerator(all_ip_results, all_url_results)
             reporter.generate_excel(self.filepath)
             self.finished.emit(True, self.filepath)
@@ -141,7 +141,7 @@ class FileAnalysisWorker(QThread):
                     processed_count += 1
                     self.progress_update.emit(processed_count, total_files)
 
-            self.results = {'ips': {}, 'urls': {}, 'files': all_file_results, 'repositories': []}
+            self.results = {'files': all_file_results}
             reporter = ReportGenerator({}, {}, all_file_results)
             reporter.generate_excel(self.save_path)
             self.finished.emit(True, self.save_path)
@@ -183,7 +183,7 @@ class RepoAnalysisWorker(QThread):
                     processed_count += 1
                     self.progress_update.emit(processed_count, total_repos)
             
-            self.results = {'ips': {}, 'urls': {}, 'files': {}, 'repositories': all_repo_results}
+            self.results = {'repositories': all_repo_results}
             reporter = ReportGenerator({}, {}, {}, all_repo_results)
             reporter.generate_excel(self.save_path)
             self.finished.emit(True, self.save_path)
@@ -462,6 +462,9 @@ class VtotalscanGUI(QMainWindow):
         self.log_console.append(f"[{timestamp}] >> {message}")
     
     def start_repo_analysis(self):
+        self.last_ioc_results = None
+        self.last_file_results = None
+        self.last_repo_results = None
         input_text = self.repo_url_input.toPlainText()
         repo_urls, invalid_lines, duplicate_lines = parse_repo_urls(input_text)
 
@@ -508,6 +511,9 @@ class VtotalscanGUI(QMainWindow):
         self.progress_dialog.show()
 
     def start_ioc_analysis(self):
+        self.last_ioc_results = None
+        self.last_file_results = None
+        self.last_repo_results = None
         filepath, _ = QFileDialog.getSaveFileName(self, "Salvar Relatório Excel", "Analise_IOCs.xlsx", "Arquivos Excel (*.xlsx)")
         if not filepath:
             self.log("Operação de salvar cancelada.")
@@ -527,6 +533,9 @@ class VtotalscanGUI(QMainWindow):
         self.progress_dialog.show()
     
     def start_file_analysis(self):
+        self.last_ioc_results = None
+        self.last_file_results = None
+        self.last_repo_results = None
         filepaths, _ = QFileDialog.getOpenFileNames(self, "Selecionar Arquivos para Análise", "", "Todos os Arquivos (*)")
         if not filepaths:
             self.log("Nenhum arquivo selecionado.")
