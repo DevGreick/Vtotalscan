@@ -72,7 +72,7 @@ Ao final, você recebe um relatório completo do risco antes de expor seu ambien
 - **Segurança**: aplica técnicas de *defang* em todos os relatórios para evitar a execução acidental de links ou IPs maliciosos.
 
 <a id="screenshot-da-ferramenta"></a>
-## 📸 Screenshot da Ferramenta
+## Screenshot da Ferramenta
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ThreatsSy.png" alt="Screenshot da Aplicação">
@@ -137,7 +137,7 @@ python main_gui.py
 ```
 
 <a id="configuracao-essencial"></a>
-## ⚙️ Configuração Essencial
+##  Configuração Essencial
 
 Antes do primeiro uso, você precisa configurar suas chaves de API.
 
@@ -156,7 +156,7 @@ Antes do primeiro uso, você precisa configurar suas chaves de API.
 - **Ollama**: verifique se o serviço está rodando para usar a funcionalidade de resumo por IA. O endpoint padrão já vem configurado.
 
 <a id="como-usar"></a>
-## 🛠️ Como Usar
+## Como Usar
 
 Toda a operação é feita através da interface gráfica.
 
