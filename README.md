@@ -1,4 +1,4 @@
-<h1 align="center">ThreatSpy</h1>
+<h1 align="center">🔎 ThreatSpy</h1>
 
 <div align="center">
 
