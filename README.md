@@ -19,6 +19,25 @@
 
 Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que automatiza a consulta de IPs, URLs e arquivos em múltiplas fontes, gera relatórios profissionais e cria resumos com IA local.
 
+## Sumário
+- [Requisitos](#requisitos)
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Funcionalidades Principais](#funcionalidades-principais)
+- [Screenshot da Ferramenta](#screenshot-da-ferramenta)
+- [Download e Instalação](#download-e-instalacao)
+  - [Para Usuários (Windows)](#para-usuarios-windows)
+  - [Para Usuários (macOS)](#para-usuarios-macos)
+  - [Para Usuários (Linux)](#para-usuarios-linux)
+  - [Para Desenvolvedores (a partir do Código-Fonte)](#para-desenvolvedores-a-partir-do-codigo-fonte)
+- [Configuração](#configuracao)
+  - [Chave Principal (Essencial)](#chave-principal-essencial)
+  - [Chaves Opcionais (Recomendadas)](#chaves-opcionais-recomendadas)
+  - [IA Local (Opcional)](#ia-local-opcional)
+- [Como Usar](#como-usar)
+- [Contribuição](#contribuicao)
+- [Licença](#licenca)
+
+
 ## Requisitos
 
 - **Python 3.8+** instalado no sistema. Baixe em: https://www.python.org/downloads/
