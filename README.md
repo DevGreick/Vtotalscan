@@ -1,5 +1,14 @@
 <h1 align="center">🔎 ThreatSpy</h1>
 
+<div align="center">
+
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
+![GUI](https://img.shields.io/badge/GUI-PySide6-purple.svg)
+![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
+
+</div>
 <p align="center">
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/spy2-1.png" alt="Logo do ThreatSpy" width="150">
 </p>
@@ -36,7 +45,8 @@ Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que
 
 ThreatSpy é uma ferramenta de Threat Intelligence com interface gráfica, desenvolvida para simplificar a análise de indicadores de ameaça. Com ela, você pode investigar IPs, URLs, arquivos e repositórios de código suspeitos de forma rápida e segura.
 
-A ferramenta automatiza consultas a múltiplas fontes (VirusTotal, AbuseIPDB, Shodan, etc.), gera relatórios detalhados em Excel e PDF, e utiliza um modelo de IA local (via Ollama) para criar resumos executivos das análises.
+
+O projeto começou como um script simples para um colega e evoluiu para esta suíte de análise completa, a ferramenta automatiza consultas a múltiplas fontes (VirusTotal, AbuseIPDB, Shodan, etc.), gera relatórios detalhados em Excel e PDF, e utiliza um modelo de IA local (via Ollama) para criar resumos executivos das análises.
 
 <a id="caso-real"></a>
 ## 🚨 Caso Real – O Golpe do Repositório Falso
