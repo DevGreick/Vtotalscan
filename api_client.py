@@ -4,6 +4,8 @@ import urllib3
 import time
 import keyring
 import logging
+import base64
+from urllib.parse import urlparse, quote_plus
 
 class ApiClient:
     def __init__(self):
@@ -12,10 +14,12 @@ class ApiClient:
         self.urlhaus_api_key = keyring.get_password("vtotalscan", "urlhaus_api_key")
         self.shodan_api_key = keyring.get_password("vtotalscan", "shodan_api_key")
         self.mb_api_key = keyring.get_password("vtotalscan", "malwarebazaar_api_key")
+        self.github_api_key = keyring.get_password("vtotalscan", "github_api_key")
+        self.gitlab_api_key = keyring.get_password("vtotalscan", "gitlab_api_key")
         self.ai_endpoint = self._read_config('AI', 'endpoint')
         
         self.session = requests.Session()
-        self.session.headers.update({ "User-Agent": "Vtotalscan/1.0" })
+        self.session.headers.update({ "User-Agent": "ThreatSpy/1.2" })
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def _read_config(self, section, key):
@@ -37,7 +41,7 @@ class ApiClient:
                 return response.json()
             except requests.exceptions.HTTPError as e:
                 if 400 <= e.response.status_code < 500:
-                    if e.response.status_code == 429 or e.response.status_code == 403: 
+                    if e.response.status_code in [429, 403]: 
                         logging.warning(f"Limite/bloqueio da API atingido ({e.response.status_code}). Aguardando para tentar novamente...")
                         time.sleep((backoff_factor ** retries))
                         retries += 1
@@ -45,7 +49,7 @@ class ApiClient:
                             logging.error(f"Máximo de retentativas para limite de API atingido em {url}.")
                             return {"error": "Rate Limit"}
                         continue
-                    if e.response.status_code == 404 and ("shodan" in url or "virustotal.com/api/v3/files/" in url):
+                    if e.response.status_code == 404:
                         logging.info(f"Recurso não encontrado na API (404): {url}")
                         return {"error": "Not Found"}
                     
@@ -62,6 +66,88 @@ class ApiClient:
                 retries += 1
         
         logging.error(f"Máximo de tentativas atingido para a URL: {url}")
+        return None
+
+    def _get_platform_from_url(self, repo_url):
+        hostname = urlparse(repo_url).hostname
+        if hostname and 'github.com' in hostname:
+            return 'github'
+        if hostname and 'gitlab.com' in hostname:
+            return 'gitlab'
+        return None
+        
+    def _get_gitlab_project_id(self, project_path, gitlab_host):
+        project_path_encoded = quote_plus(project_path)
+        url = f"https://{gitlab_host}/api/v4/projects/{project_path_encoded}"
+        headers = {}
+        if self.gitlab_api_key:
+            headers["PRIVATE-TOKEN"] = self.gitlab_api_key
+            
+        project_data = self._make_request('GET', url, headers=headers)
+        if project_data and isinstance(project_data, dict) and 'id' in project_data:
+            return project_data['id']
+        logging.error(f"Não foi possível encontrar o ID do projeto GitLab para: {project_path}")
+        return None
+
+    def list_repository_files(self, repo_url):
+        platform = self._get_platform_from_url(repo_url)
+        parsed_url = urlparse(repo_url)
+        path_parts = parsed_url.path.strip('/').split('/')
+        
+        if platform == 'github':
+            owner, repo = path_parts[0], path_parts[1]
+            api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/"
+            headers = {"Accept": "application/vnd.github.v3+json"}
+            if self.github_api_key:
+                headers["Authorization"] = f"token {self.github_api_key}"
+            
+            files = self._make_request('GET', api_url, headers=headers)
+            if isinstance(files, list):
+                return [{'name': f.get('name'), 'path': f.get('path'), 'type': f.get('type'), 'platform': 'github', 'item_url': f.get('url')} for f in files]
+            return files
+
+        elif platform == 'gitlab':
+            project_path = "/".join(path_parts)
+            project_id = self._get_gitlab_project_id(project_path, parsed_url.hostname)
+            if not project_id:
+                return {"error": "GitLab Project Not Found"}
+
+            api_url = f"https://{parsed_url.hostname}/api/v4/projects/{project_id}/repository/tree"
+            headers = {}
+            if self.gitlab_api_key:
+                headers["PRIVATE-TOKEN"] = self.gitlab_api_key
+
+            files = self._make_request('GET', api_url, headers=headers)
+            if isinstance(files, list):
+                return [{'name': f.get('name'), 'path': f.get('path'), 'type': f.get('type'), 'platform': 'gitlab', 'project_id': project_id} for f in files]
+            return files
+        
+        return {"error": "Platform not supported"}
+
+    def get_repository_file_content(self, file_info):
+        platform = file_info.get('platform')
+
+        if platform == 'github':
+            headers = {"Accept": "application/vnd.github.v3+json"}
+            if self.github_api_key:
+                headers["Authorization"] = f"token {self.github_api_key}"
+            
+            response = self._make_request('GET', file_info['item_url'], headers=headers)
+            if response and 'content' in response:
+                return base64.b64decode(response['content']).decode('utf-8', errors='ignore')
+
+        elif platform == 'gitlab':
+            project_id = file_info['project_id']
+            file_path_encoded = quote_plus(file_info['path'])
+            api_url = f"https://gitlab.com/api/v4/projects/{project_id}/repository/files/{file_path_encoded}?ref=main"
+            headers = {}
+            if self.gitlab_api_key:
+                headers["PRIVATE-TOKEN"] = self.gitlab_api_key
+
+            response = self._make_request('GET', api_url, headers=headers)
+            if response and 'content' in response:
+                return base64.b64decode(response['content']).decode('utf-8', errors='ignore')
+
         return None
 
     def check_ip(self, ip):

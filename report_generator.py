@@ -1,3 +1,4 @@
+# report_generator.py
 import xlsxwriter
 import hashlib
 import re
@@ -14,14 +15,14 @@ from reportlab.pdfbase.ttfonts import TTFont
 from utils import defang_ioc, resource_path
 
 class ReportGenerator:
-    def __init__(self, ip_results_dict, url_results_dict, file_results_dict=None):
+    def __init__(self, ip_results_dict, url_results_dict, file_results_dict=None, repo_results_dict=None):
         self.ip_results_dict = ip_results_dict if ip_results_dict is not None else {}
         self.url_results_dict = url_results_dict if url_results_dict is not None else {}
         self.file_results_dict = file_results_dict if file_results_dict is not None else {}
+        self.repo_results_dict = repo_results_dict if repo_results_dict is not None else []
         self.generation_time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
     def _draw_footer(self, canvas, doc):
-        """Desenha o rodapé em cada página do PDF."""
         canvas.saveState()
         canvas.setFont('Helvetica', 8)
         canvas.setFillColor(grey)
@@ -47,6 +48,28 @@ class ReportGenerator:
                 hyperlink_format = workbook.add_format({'font_color': 'blue', 'underline': 1, 'border': 1, 'valign': 'top'})
                 score_high = workbook.add_format({'bg_color': '#FFC7CE', 'font_color': '#9C0006', 'border': 1, 'valign': 'top'})
                 score_med = workbook.add_format({'bg_color': '#FFEB9C', 'font_color': '#9C6500', 'border': 1, 'valign': 'top'})
+
+                if self.repo_results_dict:
+                    ws_repo = workbook.add_worksheet("Relatório de Repositório")
+                    headers_repo = ["Repositório URL", "Risco Estático", "Resumo", "Segredos Expostos", "Arquivos Suspeitos", "Dependências"]
+                    ws_repo.write_row('A1', headers_repo, header_format)
+                    ws_repo.set_column('A:A', 50); ws_repo.set_column('B:B', 15); ws_repo.set_column('C:F', 40)
+                    
+                    row_num = 1
+                    for res in self.repo_results_dict:
+                        row_num += 1
+                        score = res.get('risk_score', 0)
+                        score_format = score_high if score >= 50 else (score_med if score >= 20 else cell_format)
+                        
+                        secrets_str = "\n".join([f"- {s['type']} em {s['file']}" for s in res.get('exposed_secrets', [])])
+                        deps_str = "\n".join([f"{file}: {', '.join(pkgs)}" for file, pkgs in res.get('dependencies', {}).items()])
+
+                        ws_repo.write(f'A{row_num}', res.get('url'), cell_format)
+                        ws_repo.write(f'B{row_num}', f"{score}/100", score_format)
+                        ws_repo.write(f'C{row_num}', "\n".join(f"- {s}" for s in res.get('summary', [])), wrap_format)
+                        ws_repo.write(f'D{row_num}', secrets_str if secrets_str else "Nenhum", wrap_format)
+                        ws_repo.write(f'E{row_num}', "\n".join(res.get('suspicious_files', [])), wrap_format)
+                        ws_repo.write(f'F{row_num}', deps_str if deps_str else "Nenhuma", wrap_format)
 
                 if self.ip_results_dict:
                     ws_ips = workbook.add_worksheet("Relatório de IPs")
@@ -182,11 +205,22 @@ class ReportGenerator:
             malicious_files_vt = [(res.get('filename', f_hash[:15]), f_hash) for f_hash, res in self.file_results_dict.items() if (res.get('virustotal') or {}).get('data',{}).get('attributes',{}).get('last_analysis_stats',{}).get('malicious',0) > 0]
             
             summary_data = [['Item', 'Resultado']]
+            if self.repo_results_dict:
+                summary_data.extend([['Total de Repositórios analisados', str(len(self.repo_results_dict))]])
+                highest_risk_repo = max(self.repo_results_dict, key=lambda r: r.get('risk_score', 0), default=None)
+                if highest_risk_repo:
+                    repo_url = highest_risk_repo.get("url", "N/A")
+                    wrapped_url = Paragraph(f'<a href="{repo_url}" color="blue">{repo_url}</a>', styles['TableCell'])
+                    summary_data.extend([
+                        ['Repositório com Maior Risco', wrapped_url],
+                        ['Maior Risco Encontrado', f"{highest_risk_repo.get('risk_score', 0)}/100"]
+                    ])
+
             if self.ip_results_dict: summary_data.extend([['Total de IPs analisados', str(len(self.ip_results_dict))], ['IPs maliciosos (VT)', str(len(malicious_ips_vt))]])
             if self.url_results_dict: summary_data.extend([['Total de URLs analisadas', str(len(self.url_results_dict))], ['URLs maliciosas (VT)', str(len(malicious_urls_vt))]])
             if self.file_results_dict: summary_data.extend([['Total de arquivos analisados', str(len(self.file_results_dict))], ['Arquivos maliciosos (VT)', str(len(malicious_files_vt))]])
             
-            summary_table = Table(summary_data, colWidths=[2.5*inch, 2.5*inch]); summary_table.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,0), navy), ('TEXTCOLOR',(0,0),(-1,0), (1,1,1)), ('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('FONTNAME', (0,0), (-1,0), font_name_bold), ('BOTTOMPADDING', (0,0), (-1,0), 12), ('BACKGROUND', (0,1), (-1,-1), (0.9, 0.9, 0.9)), ('GRID', (0,0), (-1,-1), 1, (0.7,0.7,0.7))]))
+            summary_table = Table(summary_data, colWidths=[2.5*inch, 4.5*inch]); summary_table.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,0), navy), ('TEXTCOLOR',(0,0),(-1,0), (1,1,1)), ('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('FONTNAME', (0,0), (-1,0), font_name_bold), ('BOTTOMPADDING', (0,0), (-1,0), 12), ('BACKGROUND', (0,1), (-1,-1), (0.9, 0.9, 0.9)), ('GRID', (0,0), (-1,-1), 1, (0.7,0.7,0.7))]))
             story.append(summary_table); story.append(Spacer(1, 0.2*inch))
 
             if malicious_ips_vt or malicious_urls_vt or malicious_files_vt:
@@ -242,6 +276,21 @@ class ReportGenerator:
             story.append(Spacer(1, 0.1*inch))
             table_style = TableStyle([('BACKGROUND', (0,0), (-1,0), navy), ('TEXTCOLOR',(0,0),(-1,0), whitesmoke), ('ALIGN', (0,0), (-1,-1), 'LEFT'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('FONTNAME', (0,0), (-1,0), font_name_bold), ('FONTSIZE', (0,0), (-1,0), 9), ('BOTTOMPADDING', (0,0), (-1,0), 10), ('BACKGROUND', (0,1), (-1,-1), whitesmoke), ('GRID', (0,0), (-1,-1), 1, lightgrey), ('ROWBACKGROUNDS', (0,1), (-1,-1), [whitesmoke, (0.9,0.9,0.9)])])
 
+            if self.repo_results_dict:
+                story.append(Paragraph("<b>Repositórios Analisados</b>", styles['h3']))
+                for res in self.repo_results_dict:
+                    secrets_str = "<br/>".join([f"• {s['type']} em {s['file']}" for s in res.get('exposed_secrets', [])]) or "Nenhum"
+                    files_str = "<br/>".join([f"• {f}" for f in res.get('suspicious_files', [])]) or "Nenhum"
+
+                    repo_table_data = [
+                        [Paragraph('<b>URL</b>', styles['TableCellBold']), Paragraph(f'<a href="{res.get("url")}" color="blue">{res.get("url")}</a>', styles['TableCell'])],
+                        [Paragraph('<b>Risco Estático</b>', styles['TableCellBold']), Paragraph(f'{res.get("risk_score", 0)}/100', styles['TableCell'])],
+                        [Paragraph('<b>Arquivos Suspeitos</b>', styles['TableCellBold']), Paragraph(files_str, styles['TableCell'])],
+                        [Paragraph('<b>Segredos Expostos</b>', styles['TableCellBold']), Paragraph(secrets_str, styles['TableCell'])]
+                    ]
+                    repo_table = Table(repo_table_data, colWidths=[1.5*inch, 5.5*inch]); repo_table.setStyle(table_style)
+                    story.append(repo_table); story.append(Spacer(1, 0.2*inch))
+
             if self.ip_results_dict:
                 story.append(Paragraph("<b>IPs Analisados</b>", styles['h3']))
                 ip_table_data = [['IP', 'VT Det.', 'Abuse Score', 'País', 'Provedor']]
@@ -266,7 +315,7 @@ class ReportGenerator:
                     final_url = vt_res.get("meta", {}).get("url_info", {}).get("url", url); url_hash = hashlib.sha256(final_url.encode('utf-8')).hexdigest()
                     row_text = [Paragraph(f'<a href="https://www.virustotal.com/gui/url/{url_hash}" color="blue">{defang_ioc(url)}</a>', styles['TableCell']), Paragraph(str(vt_mal), styles['TableCell']), Paragraph(uh_status, styles['TableCell'])]
                     url_table_data.append(row_text)
-                url_table = Table(url_table_data, colWidths=[4.7*inch, 0.7*inch, 0.9*inch]); url_table.setStyle(table_style)
+                url_table = Table(url_table_data, colWidths=[5.4*inch, 0.7*inch, 0.9*inch]); url_table.setStyle(table_style)
                 story.append(url_table); story.append(Spacer(1, 0.2*inch))
 
             if self.file_results_dict:
@@ -291,7 +340,7 @@ class ReportGenerator:
                     
                     row_text = [Paragraph(defang_ioc(filename), styles['TableCell']), Paragraph(f'<a href="https://www.virustotal.com/gui/file/{f_hash}" color="blue">{f_hash[:20]}...</a>', styles['TableCell']), Paragraph(str(vt_mal), styles['TableCell']), Paragraph(threat_name or 'N/A', styles['TableCell'])]
                     file_table_data.append(row_text)
-                file_table = Table(file_table_data, colWidths=[2*inch, 2.6*inch, 0.7*inch, 1*inch]); file_table.setStyle(table_style)
+                file_table = Table(file_table_data, colWidths=[2.3*inch, 2.3*inch, 0.7*inch, 1.7*inch]); file_table.setStyle(table_style)
                 story.append(file_table); story.append(Spacer(1, 0.2*inch))
 
             doc.build(story, onFirstPage=self._draw_footer, onLaterPages=self._draw_footer)
