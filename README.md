@@ -19,24 +19,34 @@
 
 Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que automatiza a consulta de IPs, URLs e arquivos em múltiplas fontes, gera relatórios profissionais e cria resumos com IA local.
 
-## Sumário
+> [!TIP]
+> Abra o Sumário abaixo para navegar rápido
 
-- [Requisitos](#requisitos)
-- [Sobre o Projeto](#sobre-o-projeto)
-- [Funcionalidades Principais](#funcionalidades-principais)
-- [Screenshot da Ferramenta](#screenshot-da-ferramenta)
-- [Download e Instalação](#download-e-instalação)
-  - [Para Usuários (Windows)](#para-usuários-windows)
-  - [Para Usuários (macOS)](#para-usuários-macos)
-  - [Para Usuários (Linux)](#para-usuários-linux)
-  - [Para Desenvolvedores (a partir do Código-Fonte)](#para-desenvolvedores-a-partir-do-código-fonte)
-- [Configuração](#configuração)
-  - [Chave Principal (Essencial)](#chave-principal-essencial)
-  - [Chaves Opcionais (Recomendadas)](#chaves-opcionais-recomendadas)
-  - [IA Local (Opcional)](#ia-local-opcional)
-- [Como Usar](#como-usar)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
+<details>
+  <summary><strong> Sumário</strong> <sub>(clique para expandir)</sub></summary>
+
+  <br/>
+
+  - [Requisitos](#requisitos)
+  - [Sobre o Projeto](#sobre-o-projeto)
+  - [Funcionalidades Principais](#funcionalidades-principais)
+  - [Screenshot da Ferramenta](#screenshot-da-ferramenta)
+  - [Download e Instalação](#download-e-instalação)
+    - [Para Usuários (Windows)](#para-usuários-windows)
+    - [Para Usuários (macOS)](#para-usuários-macos)
+    - [Para Usuários (Linux)](#para-usuários-linux)
+    - [Para Desenvolvedores (a partir do Código-Fonte)](#para-desenvolvedores-a-partir-do-código-fonte)
+  - [Configuração](#configuração)
+    - [Chave Principal (Essencial)](#chave-principal-essencial)
+    - [Chaves Opcionais (Recomendadas)](#chaves-opcionais-recomendadas)
+    - [IA Local (Opcional)](#ia-local-opcional)
+  - [Como Usar](#como-usar)
+  - [Contribuição](#contribuição)
+  - [Licença](#licença)
+
+</details>
+
+
 
 
 ## Requisitos
