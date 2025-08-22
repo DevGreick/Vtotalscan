@@ -26,6 +26,21 @@
 
 <br>
 
+## Requisitos
+
+- **Python 3.8+** instalado no sistema. Baixe em: https://www.python.org/downloads/
+- **Ollama** instalado (opcional) para usar os resumos por IA local. Baixe em: https://ollama.com/
+- **Chaves de API** dos serviços que você pretende usar:
+  - VirusTotal (essencial)
+  - AbuseIPDB
+  - URLHaus
+  - Shodan
+  - MalwareBazaar
+  - Github (recomendado)
+  - Gitlab (recomendado)
+- **Fonts DejaVu** (opcional, recomendadas para PDF): `DejaVuSans.ttf` e `DejaVuSans-Bold.ttf` na pasta do projeto.
+
+  
 <div align="center">
 <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ThreatsSy.png" alt="Screenshot da interface do ThreatSpy" width="700"/>
 </div>
