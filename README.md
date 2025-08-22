@@ -70,18 +70,18 @@ Ao final, você recebe um relatório completo do risco antes de expor seu ambien
 
 ## ✨ Funcionalidades Principais
 
-- 🕵️ **Análise Multi-Fonte de IOCs**: consulta a reputação de IPs, URLs e hashes de arquivos em serviços como VirusTotal, AbuseIPDB, Shodan, URLHaus e MalwareBazaar.
-- 📂 **Análise de Múltiplos Arquivos**: calcule o hash SHA256 de múltiplos arquivos locais e verifique sua reputação de uma só vez.
-- 🔬 **Análise Estática de Repositórios Aprofundada**: inspeciona repositórios GitHub e GitLab remotamente em busca de:
+- **Análise Multi-Fonte de IOCs**: consulta a reputação de IPs, URLs e hashes de arquivos em serviços como VirusTotal, AbuseIPDB, Shodan, URLHaus e MalwareBazaar.
+- **Análise de Múltiplos Arquivos**: calcule o hash SHA256 de múltiplos arquivos locais e verifique sua reputação de uma só vez.
+- **Análise Estática de Repositórios Aprofundada**: inspeciona repositórios GitHub e GitLab remotamente em busca de:
   - segredos expostos (chaves de API, tokens etc.)
   - arquivos de configuração sensíveis
   - IOCs ofuscados em Base64
   - comandos perigosos em READMEs
   - scripts maliciosos de npm (`preinstall`/`postinstall`)
-- 🖥️ **Interface Gráfica Intuitiva**: GUI em PySide6 para analisar múltiplos alvos, arquivos e repositórios de forma organizada e paralela.
-- 📄 **Relatórios Completos e Seguros**: gera relatórios em Excel (.xlsx) e PDF. Todos os indicadores são *defanged*.
-- 🤖 **Resumo com IA Local**: integração com Ollama para resumos executivos, explicações de risco e planos de ação.
-- 🛡️ **Segurança e Privacidade**:
+- **Interface Gráfica Intuitiva**: GUI em PySide6 para analisar múltiplos alvos, arquivos e repositórios de forma organizada e paralela.
+- **Relatórios Completos e Seguros**: gera relatórios em Excel (.xlsx) e PDF. Todos os indicadores são *defanged*.
+- **Resumo com IA Local**: integração com Ollama para resumos executivos, explicações de risco e planos de ação.
+- **Segurança e Privacidade**:
   - chaves de API salvas com segurança via keyring
   - logs em pastas de dados do usuário, garantindo execução em qualquer diretório
 
