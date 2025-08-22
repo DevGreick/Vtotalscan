@@ -27,7 +27,7 @@
 <br>
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ThreatSpy.png" alt="Screenshot da interface do ThreatSpy" width="700"/>
+<img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ThreatsSy.png" alt="Screenshot da interface do ThreatSpy" width="700"/>
 </div>
 
 > [!TIP]
