@@ -58,6 +58,9 @@ Com o ThreatSpy, você não precisa clonar ou executar nada. Basta usar a aba **
 - **Segredos Expostos**: chaves de API, tokens e senhas em arquivos como `.env`.
 - **Arquivos de Configuração Sensíveis**: `credentials.json`, `database.yml`, etc.
 - **Dependências e Scripts**: análise de `package.json`, `requirements.txt` e outros.
+- **IOCs Ocultos:** Decodifica strings Base64 para encontrar URLs e domínios maliciosos escondidos.
+- **Comandos Perigosos:** Alerta sobre comandos suspeitos em arquivos como `README.md`, como `npm install --force` ou `curl ... | sh.`
+
 
 Ao final, você recebe um relatório completo do risco antes de expor seu ambiente.
 
