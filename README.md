@@ -52,7 +52,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 <a id="caso-real--o-golpe-do-repositório-falso"></a>
 
-## 🚨 Caso Real – O Golpe do Repositório Falso
+## 🚨 Caso real: golpe do repositório falso
 
 Recentemente, um golpe de recrutamento no LinkedIn usou repositórios GitHub maliciosos como "testes técnicos" para DEVs. O objetivo era fazer o candidato clonar o projeto e rodar um script de instalação malicioso (`npm install`) para infectar sua máquina e roubar credenciais.
 
