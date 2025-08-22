@@ -42,43 +42,33 @@ class ReportGenerator:
                 header_format = workbook.add_format({'bold': True, 'font_color': 'white', 'bg_color': '#004B8B', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
                 cell_format = workbook.add_format({'border': 1, 'valign': 'top'})
                 wrap_format = workbook.add_format({'border': 1, 'valign': 'top', 'text_wrap': True})
-                error_format = workbook.add_format({'font_color': 'red', 'border': 1, 'valign': 'top'})
-                warning_format = workbook.add_format({'font_color': '#FFC000', 'border': 1, 'valign': 'top'})
                 hyperlink_format = workbook.add_format({'font_color': 'blue', 'underline': 1, 'border': 1, 'valign': 'top'})
+                score_crit = workbook.add_format({'bg_color': '#FF0000', 'font_color': 'white', 'border': 1, 'valign': 'top'})
                 score_high = workbook.add_format({'bg_color': '#FFC7CE', 'font_color': '#9C0006', 'border': 1, 'valign': 'top'})
                 score_med = workbook.add_format({'bg_color': '#FFEB9C', 'font_color': '#9C6500', 'border': 1, 'valign': 'top'})
 
                 if self.repo_results_dict:
                     ws_repo = workbook.add_worksheet("Relatório de Repositório")
-                    headers_repo = ["Repositório URL", "Risco Estático", "Resumo", "Segredos Expostos", "Arquivos Suspeitos", "Dependências", "IOCs Extraídos"]
+                    headers_repo = ["Repositório URL", "Risco", "Achados Críticos (Findings)", "Dependências", "IOCs Extraídos"]
                     ws_repo.write_row('A1', headers_repo, header_format)
-                    ws_repo.set_column('A:A', 50); ws_repo.set_column('B:B', 15); ws_repo.set_column('C:G', 40)
+                    ws_repo.set_column('A:A', 50); ws_repo.set_column('B:B', 10); ws_repo.set_column('C:E', 45)
                     
                     row_num = 1
                     for res in self.repo_results_dict:
                         row_num += 1
                         score = res.get('risk_score', 0)
-                        score_format = score_high if score >= 50 else (score_med if score >= 20 else cell_format)
+                        score_format = score_crit if score > 90 else (score_high if score > 70 else (score_med if score > 40 else cell_format))
                         
-                        secrets_str = "\n".join([f"- {s['type']} em {s['file']}" for s in res.get('exposed_secrets', [])])
+                        findings_str = "\n".join([f"[{f.get('severity')}] {f.get('description')} (em: {f.get('file')})" for f in res.get('findings', [])])
                         deps_str = "\n".join([f"{file}: {', '.join(pkgs)}" for file, pkgs in res.get('dependencies', {}).items()])
-                        
-                        iocs_list = []
-                        for ioc_info in res.get('extracted_iocs', []):
-                            ioc = ioc_info.get('ioc', 'N/A')
-                            rep = ioc_info.get('reputation', {})
-                            vt_malicious = rep.get('virustotal', {}).get('data', {}).get('attributes', {}).get('stats', {}).get('malicious', 0)
-                            uh_status = rep.get('urlhaus', {}).get('url_status', 'N/A')
-                            iocs_list.append(f"- {defang_ioc(ioc)} (VT: {vt_malicious}, URLHaus: {uh_status})")
+                        iocs_list = [f"- {defang_ioc(i.get('ioc'))} (VT: {i.get('reputation',{}).get('virustotal',{}).get('data',{}).get('attributes',{}).get('stats',{}).get('malicious',0)})" for i in res.get('extracted_iocs', [])]
                         iocs_str = "\n".join(iocs_list)
 
-                        ws_repo.write(f'A{row_num}', res.get('url'), cell_format)
+                        ws_repo.write_url(f'A{row_num}', res.get('url'), hyperlink_format, res.get('url'))
                         ws_repo.write(f'B{row_num}', f"{score}/100", score_format)
-                        ws_repo.write(f'C{row_num}', "\n".join(f"- {s}" for s in res.get('summary', [])), wrap_format)
-                        ws_repo.write(f'D{row_num}', secrets_str if secrets_str else "Nenhum", wrap_format)
-                        ws_repo.write(f'E{row_num}', "\n".join(res.get('suspicious_files', [])), wrap_format)
-                        ws_repo.write(f'F{row_num}', deps_str if deps_str else "Nenhuma", wrap_format)
-                        ws_repo.write(f'G{row_num}', iocs_str if iocs_str else "Nenhum", wrap_format)
+                        ws_repo.write(f'C{row_num}', findings_str if findings_str else "Nenhum achado de risco.", wrap_format)
+                        ws_repo.write(f'D{row_num}', deps_str if deps_str else "Nenhuma", wrap_format)
+                        ws_repo.write(f'E{row_num}', iocs_str if iocs_str else "Nenhum", wrap_format)
 
                 if self.ip_results_dict:
                     ws_ips = workbook.add_worksheet("Relatório de IPs")
@@ -96,23 +86,20 @@ class ReportGenerator:
                         if vt_res and not vt_res.get('error'):
                             attrs = vt_res.get("data", {}).get("attributes", {}); malicious = attrs.get("last_analysis_stats", {}).get("malicious", 0)
                             ws_ips.write(f'D{row_num}', malicious, score_high if malicious > 0 else cell_format); ws_ips.write(f'G{row_num}', attrs.get('as_owner', 'N/A'), cell_format)
-                        elif vt_res and vt_res.get('error') == 'Rate Limit':
-                            ws_ips.write(f'D{row_num}', 'Limite Atingido', warning_format)
-                            ws_ips.write(f'G{row_num}', 'N/A', cell_format)
                         else: 
-                            ws_ips.write(f'D{row_num}', 'Falha', error_format); ws_ips.write(f'G{row_num}', 'N/A', error_format)
+                            ws_ips.write(f'D{row_num}', 'Falha', cell_format); ws_ips.write(f'G{row_num}', 'N/A', cell_format)
                         
                         if abuse_res and abuse_res.get('data'):
                             data = abuse_res['data']; score = data.get('abuseConfidenceScore', 0)
                             score_format = score_high if score >= 90 else (score_med if score >= 50 else cell_format)
                             ws_ips.write(f'E{row_num}', score, score_format); ws_ips.write(f'F{row_num}', data.get('countryCode', 'N/A'), cell_format)
-                        else: ws_ips.write_row(f'E{row_num}', ['Falha', 'N/A'], error_format)
+                        else: ws_ips.write_row(f'E{row_num}', ['Falha', 'N/A'], cell_format)
                         
                         if shodan_res and not shodan_res.get('error'):
                             ws_ips.write(f'H{row_num}', ", ".join(map(str, shodan_res.get('ports', []))), wrap_format); ws_ips.write(f'I{row_num}', shodan_res.get('org', 'N/A'), wrap_format)
                             ws_ips.write(f'J{row_num}', ", ".join(defang_ioc(h) for h in shodan_res.get('hostnames', [])), wrap_format); ws_ips.write(f'K{row_num}', ", ".join(shodan_res.get('vulns', [])) if shodan_res.get('vulns') else "Nenhuma", wrap_format)
                         elif shodan_res and shodan_res.get('error') == 'Not Found': ws_ips.write_row(f'H{row_num}', ['Não encontrado', 'N/A', 'N/A', 'N/A'], cell_format)
-                        else: ws_ips.write_row(f'H{row_num}', ['Falha', 'N/A', 'N/A', 'N/A'], error_format)
+                        else: ws_ips.write_row(f'H{row_num}', ['Falha', 'N/A', 'N/A', 'N/A'], cell_format)
 
                 if self.url_results_dict:
                     ws_urls = workbook.add_worksheet("Relatório de URLs")
@@ -129,12 +116,9 @@ class ReportGenerator:
                             final_url = vt_res.get("meta", {}).get("url_info", {}).get("url", url); url_hash = hashlib.sha256(final_url.encode('utf-8')).hexdigest()
                             malicious = vt_res.get("data", {}).get("attributes", {}).get("stats", {}).get("malicious", 0)
                             ws_urls.write_url(f'B{row_num}', f"https://www.virustotal.com/gui/url/{url_hash}", hyperlink_format, "Link"); ws_urls.write(f'C{row_num}', malicious, score_high if malicious > 0 else cell_format)
-                        elif vt_res and vt_res.get('error') == 'Rate Limit':
-                            ws_urls.write_url(f'B{row_num}', f"https://www.virustotal.com/gui/search/{url}", hyperlink_format, "Link")
-                            ws_urls.write(f'C{row_num}', 'Limite Atingido', warning_format)
                         else: 
                             ws_urls.write_url(f'B{row_num}', f"https://www.virustotal.com/gui/search/{url}", hyperlink_format, "Link")
-                            ws_urls.write(f'C{row_num}', 'Falha', error_format)
+                            ws_urls.write(f'C{row_num}', 'Falha', cell_format)
                         
                         if uh_res and uh_res.get('query_status') == 'ok' and uh_res.get('url_status'):
                             status = uh_res.get('url_status', 'not_found'); tags = ", ".join(uh_res.get('tags', []))
@@ -142,7 +126,7 @@ class ReportGenerator:
                         elif uh_res and uh_res.get('query_status') == 'no_results': 
                             ws_urls.write_row(f'D{row_num}', ['Não encontrado', 'N/A'], cell_format)
                         else: 
-                            ws_urls.write_row(f'D{row_num}', ['Falha', 'N/A'], error_format)
+                            ws_urls.write_row(f'D{row_num}', ['Falha', 'N/A'], cell_format)
 
                 if self.file_results_dict:
                     ws_files = workbook.add_worksheet("Relatório de Arquivos")
@@ -163,14 +147,9 @@ class ReportGenerator:
                             ws_files.write(f'D{row_num}', malicious, score_high if malicious > 0 else cell_format)
                             ws_files.write_row(f'F{row_num}', [trid, size], wrap_format)
                         elif vt_res and vt_res.get('error') == 'Not Found':
-                            ws_files.write(f'D{row_num}', 'Não encontrado', cell_format)
-                            ws_files.write_row(f'F{row_num}', ['N/A', 'N/A'], cell_format)
-                        elif vt_res and vt_res.get('error') == 'Rate Limit':
-                            ws_files.write(f'D{row_num}', 'Limite Atingido', warning_format)
-                            ws_files.write_row(f'F{row_num}', ['N/A', 'N/A'], cell_format)
+                            ws_files.write(f'D{row_num}', 'Não encontrado', cell_format); ws_files.write_row(f'F{row_num}', ['N/A', 'N/A'], cell_format)
                         else:
-                            ws_files.write(f'D{row_num}', 'Falha', error_format)
-                            ws_files.write_row(f'F{row_num}', ['N/A', 'N/A'], error_format)
+                            ws_files.write(f'D{row_num}', 'Falha', cell_format); ws_files.write_row(f'F{row_num}', ['N/A', 'N/A'], cell_format)
 
                         mb_res = results.get('malwarebazaar')
                         if mb_res and mb_res.get('query_status') == 'ok':
@@ -178,10 +157,8 @@ class ReportGenerator:
                             ws_files.write(f'E{row_num}', threat_name, score_high if threat_name else cell_format)
                         elif mb_res and mb_res.get('query_status') == 'hash_not_found':
                             ws_files.write(f'E{row_num}', 'Não encontrado', cell_format)
-                        elif mb_res and mb_res.get('error') == 'Rate Limit':
-                            ws_files.write(f'E{row_num}', 'Limite Atingido', warning_format)
                         else:
-                            ws_files.write(f'E{row_num}', 'Falha', error_format)
+                            ws_files.write(f'E{row_num}', 'Falha', cell_format)
         except Exception as e:
             logging.error(f"Falha ao escrever o arquivo XLSX: {e}", exc_info=True)
             raise e
@@ -304,8 +281,11 @@ class ReportGenerator:
             if self.repo_results_dict:
                 story.append(Paragraph("<b>Repositórios Analisados</b>", styles['h3']))
                 for res in self.repo_results_dict:
-                    secrets_str = "<br/>".join([f"• {s['type']} em {s['file']}" for s in res.get('exposed_secrets', [])]) or "Nenhum"
-                    files_str = "<br/>".join([f"• {f}" for f in res.get('suspicious_files', [])]) or "Nenhum"
+                    findings_list = []
+                    for f in res.get('findings', []):
+                        findings_list.append(f"• <b>[{f.get('severity')}]</b> {f.get('description')} (em: {f.get('file')})")
+                    findings_str = "<br/>".join(findings_list) or "Nenhum"
+                    
                     iocs_list = []
                     for ioc_info in res.get('extracted_iocs', []):
                         ioc = ioc_info.get('ioc', 'N/A')
@@ -316,9 +296,8 @@ class ReportGenerator:
 
                     repo_table_data = [
                         [Paragraph('<b>URL</b>', styles['TableCellBold']), Paragraph(f'<a href="{res.get("url")}" color="blue">{res.get("url")}</a>', styles['TableCell'])],
-                        [Paragraph('<b>Risco Estático</b>', styles['TableCellBold']), Paragraph(f'{res.get("risk_score", 0)}/100', styles['TableCell'])],
-                        [Paragraph('<b>Arquivos Suspeitos</b>', styles['TableCellBold']), Paragraph(files_str, styles['TableCell'])],
-                        [Paragraph('<b>Segredos Expostos</b>', styles['TableCellBold']), Paragraph(secrets_str, styles['TableCell'])],
+                        [Paragraph('<b>Risco</b>', styles['TableCellBold']), Paragraph(f'{res.get("risk_score", 0)}/100', styles['TableCell'])],
+                        [Paragraph('<b>Achados (Findings)</b>', styles['TableCellBold']), Paragraph(findings_str, styles['TableCell'])],
                         [Paragraph('<b>IOCs Extraídos</b>', styles['TableCellBold']), Paragraph(iocs_str, styles['TableCell'])]
                     ]
                     

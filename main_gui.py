@@ -8,10 +8,11 @@ import logging
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
+from urllib.parse import urlparse
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                    QPushButton, QPlainTextEdit, QLabel, QTabWidget, QComboBox,
-                                   QFileDialog, QMessageBox, QProgressDialog, QDialog, QLineEdit, QFormLayout, QTextEdit)
+                                   QFileDialog, QMessageBox, QProgressDialog, QDialog, QLineEdit, QFormLayout, QTextEdit, QCheckBox)
 from PySide6.QtGui import QIcon, QFont, QPixmap, QPalette, QColor
 from PySide6.QtCore import Qt, QThread, Signal
 
@@ -19,6 +20,8 @@ from api_client import ApiClient
 from report_generator import ReportGenerator
 from repository_analyzer import RepositoryAnalyzer
 from utils import parse_targets, calculate_sha256, resource_path, defang_ioc, parse_repo_urls, is_file_writable
+
+GITHUB_SCAN_THRESHOLD = 2
 
 def setup_logging():
     log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(module)s:%(lineno)d] - %(message)s')
@@ -34,6 +37,43 @@ def setup_logging():
         root_logger.handlers.clear()
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
+
+class DisclaimerDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Aviso Importante de Uso de Dados")
+        self.setModal(True)
+        self.setMinimumWidth(550)
+
+        layout = QVBoxLayout(self)
+        
+        disclaimer_text = """
+        <p><b>Esta é uma ferramenta poderosa de verificação de segurança.</b></p>
+        <p>Para funcionar, ela se comunica com serviços de terceiros para analisar os indicadores que você fornece. Esteja ciente de que:</p>
+        <ul style="margin-left: 20px;">
+            <li><b>Integração com Serviços Externos:</b> Os indicadores (IPs e URLs), inseridos ou extraídos de repositórios (com decodificação de Base64), são verificados em plataformas como <b>VirusTotal, AbuseIPDB, URLhaus e Shodan</b>.</li>
+            <br>
+            <li><b>Cuidado com Dados Sensíveis:</b> Se você analisar repositórios privados ou dados confidenciais (como URLs de infraestrutura interna da sua empresa), <b>essas informações podem ser enviadas às APIs mencionadas</b>.</li>
+            <br>
+            <li><b>Endpoint de IA:</b> A função de resumo por IA envia um dossiê da análise para o endpoint configurado. O padrão é Ollama local (http://localhost:11434). Se você usar um endpoint remoto, <b>os dados sairão da sua máquina</b>.</li>
+        </ul>
+        """
+
+        text_label = QLabel(disclaimer_text)
+        text_label.setWordWrap(True)
+        text_label.setOpenExternalLinks(True)
+        
+        self.checkbox = QCheckBox("Eu entendo os riscos e aceito os termos de uso da ferramenta.")
+        self.continue_button = QPushButton("Continuar")
+        self.continue_button.setEnabled(False)
+        
+        self.checkbox.toggled.connect(self.continue_button.setEnabled)
+        self.continue_button.clicked.connect(self.accept)
+        
+        layout.addWidget(text_label)
+        layout.addSpacing(15)
+        layout.addWidget(self.checkbox)
+        layout.addWidget(self.continue_button, alignment=Qt.AlignCenter)
 
 class AnalysisWorker(QThread):
     finished = Signal(bool, str)
@@ -126,7 +166,7 @@ class FileAnalysisWorker(QThread):
                         future_to_hash[future] = file_hash
                     else:
                         processed_count += 1
-                        self.progress_update.emit(processed_count, total_files)
+                        self.progress_update.emit(processed_count, total_targets)
 
                 self.log_message.emit(f"Enviando {len(future_to_hash)} arquivos para análise paralela...")
                 for future in as_completed(future_to_hash):
@@ -139,7 +179,7 @@ class FileAnalysisWorker(QThread):
                     except Exception as exc:
                         logging.error(f"Erro ao processar o hash {file_hash}: {exc}", exc_info=True)
                     processed_count += 1
-                    self.progress_update.emit(processed_count, total_files)
+                    self.progress_update.emit(processed_count, total_targets)
 
             self.results = {'files': all_file_results}
             reporter = ReportGenerator({}, {}, all_file_results)
@@ -153,7 +193,7 @@ class FileAnalysisWorker(QThread):
 class RepoAnalysisWorker(QThread):
     finished = Signal(bool, str)
     log_message = Signal(str)
-    progress_update = Signal(int, int)
+    progress_update = Signal(str, int, int)
 
     def __init__(self, repo_urls, save_path):
         super().__init__()
@@ -165,28 +205,53 @@ class RepoAnalysisWorker(QThread):
         try:
             api_client = ApiClient()
             total_repos = len(self.repo_urls)
-            processed_count = 0
             all_repo_results = []
-            self.progress_update.emit(0, total_repos)
-
+            
+            self.log_message.emit("Fase 1/3: Inspecionando Arquivos dos repositórios...")
             with ThreadPoolExecutor(max_workers=5) as executor:
                 future_to_url = {executor.submit(RepositoryAnalyzer(url, api_client).run_analysis): url for url in self.repo_urls}
-                
+                processed_count = 0
                 for future in as_completed(future_to_url):
                     url = future_to_url[future]
                     try:
                         repo_results = future.result()
                         all_repo_results.append(repo_results)
-                        self.log_message.emit(f"Repositório {url} analisado.")
+                        self.log_message.emit(f"Repositório {url} analisado (extração).")
                     except Exception as exc:
                         logging.error(f"Erro ao processar o repositório {url}: {exc}", exc_info=True)
                     processed_count += 1
-                    self.progress_update.emit(processed_count, total_repos)
+                    self.progress_update.emit("repos", processed_count, total_repos)
+
+            all_iocs = {ioc['ioc'] for repo_result in all_repo_results for ioc in repo_result.get("extracted_iocs", [])}
+            ioc_reputations = {}
+            if all_iocs:
+                self.log_message.emit(f"Fase 2/3: Verificando reputação de {len(all_iocs)} IOCs únicos...")
+                total_iocs = len(all_iocs)
+                with ThreadPoolExecutor(max_workers=10) as executor:
+                    future_to_ioc = {executor.submit(api_client.check_url_multi, ioc): ioc for ioc in all_iocs}
+                    processed_iocs = 0
+                    for future in as_completed(future_to_ioc):
+                        ioc = future_to_ioc[future]
+                        try:
+                            ioc_reputations[ioc] = future.result()
+                            self.log_message.emit(f"Reputação verificada para: {ioc[:70]}...")
+                        except Exception as exc:
+                            logging.error(f"Erro ao verificar reputação do IOC {ioc}: {exc}", exc_info=True)
+                            ioc_reputations[ioc] = {}
+                        processed_iocs += 1
+                        self.progress_update.emit("iocs", processed_iocs, total_iocs)
+
+            self.log_message.emit("Fase 3/3: Consolidando resultados e gerando relatório...")
+            for repo_result in all_repo_results:
+                for ioc_details in repo_result.get("extracted_iocs", []):
+                    if ioc_details['ioc'] in ioc_reputations:
+                        ioc_details['reputation'] = ioc_reputations[ioc_details['ioc']]
             
             self.results = {'repositories': all_repo_results}
             reporter = ReportGenerator({}, {}, {}, all_repo_results)
             reporter.generate_excel(self.save_path)
             self.finished.emit(True, self.save_path)
+
         except Exception as e:
             logging.error(f"ERRO CRÍTICO NA THREAD DE ANÁLISE DE REPOSITÓRIO: {e}", exc_info=True)
             self.log_message.emit("ERRO CRÍTICO NA ANÁLISE DE REPOSITÓRIO. Veja threatspy.log para detalhes.")
@@ -214,19 +279,11 @@ class AISummaryWorker(QThread):
             facts += f"**Análise de Repositórios ({len(repo_data)} total):**\n"
             for repo in repo_data:
                 facts += f"- Repositório: {repo.get('url')}\n"
-                facts += f"  - Nível de Risco Estático: {repo.get('risk_score', 0)}/100\n"
-                if secrets := repo.get('exposed_secrets'):
-                    facts += "  - Segredos Expostos Encontrados:\n"
-                    for secret in secrets:
-                        facts += f"    - Tipo: '{secret.get('type')}' no arquivo '{secret.get('file')}'\n"
-                if files := repo.get('suspicious_files'):
-                    facts += f"  - Arquivos Suspeitos: {', '.join(files)}\n"
-                if iocs := repo.get('extracted_iocs'):
-                    facts += "  - IOCs Ocultos (Base64) Encontrados:\n"
-                    for ioc in iocs:
-                        rep = ioc.get('reputation', {})
-                        vt_malicious = rep.get('virustotal', {}).get('data', {}).get('attributes', {}).get('stats', {}).get('malicious', 0)
-                        facts += f"    - URL: '{ioc.get('ioc')}' no arquivo '{ioc.get('source_file')}' (Detecções VT: {vt_malicious})\n"
+                facts += f"  - Nível de Risco: {repo.get('risk_score', 0)}/100\n"
+                if findings := repo.get('findings'):
+                    facts += "  - Achados Principais:\n"
+                    for finding in findings[:5]:
+                        facts += f"    - [{finding.get('severity')}] {finding.get('description')} (em: {finding.get('file')})\n"
             facts += "\n"
 
         ip_data = self.analysis_data.get('ips', {})
@@ -403,9 +460,8 @@ class VtotalscanGUI(QMainWindow):
         
         header_layout = QHBoxLayout()
         logo_label = QLabel(); pixmap = QPixmap(resource_path("spy2-1.png")).scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation); logo_label.setPixmap(pixmap)
-        title_label = QLabel("ThreatSpy"); title_label.setFont(QFont("Segoe UI", 20, QFont.Bold))
         btn_config = QPushButton("Configurações"); btn_config.setIcon(QIcon(resource_path("gear.png"))); btn_config.clicked.connect(self.open_settings_window)
-        header_layout.addWidget(logo_label); header_layout.addWidget(title_label); header_layout.addStretch(); header_layout.addWidget(btn_config)
+        header_layout.addWidget(logo_label); header_layout.addStretch(); header_layout.addWidget(btn_config)
         main_layout.addLayout(header_layout)
 
         self.tab_view_main = QTabWidget()
@@ -453,8 +509,25 @@ class VtotalscanGUI(QMainWindow):
         self.btn_ai_summary_pdf = QPushButton("Gerar Resumo em PDF"); self.btn_ai_summary_pdf.setStyleSheet("background-color: #7f8c8d; color: white;"); self.btn_ai_summary_pdf.setEnabled(False); self.btn_ai_summary_pdf.clicked.connect(self.start_ai_task_pdf)
         ai_controls_layout.addWidget(ai_label); ai_controls_layout.addWidget(self.selected_model, 1); ai_controls_layout.addWidget(self.btn_ai_summary); ai_controls_layout.addWidget(self.btn_ai_summary_pdf)
         main_layout.addWidget(self.tab_view, 2); main_layout.addLayout(ai_controls_layout)
-        self.load_models_async(); self.check_api_key_on_startup()
+        
+        self.show_disclaimer_if_first_run()
+        self.load_models_async()
+        self.check_api_key_on_startup()
     
+    def show_disclaimer_if_first_run(self):
+        config = configparser.ConfigParser()
+        config.read('API_KEY.ini')
+        if not config.has_section('AppStatus') or not config.getboolean('AppStatus', 'disclaimer_accepted', fallback=False):
+            dialog = DisclaimerDialog(self)
+            if dialog.exec() == QDialog.Accepted:
+                if not config.has_section('AppStatus'):
+                    config.add_section('AppStatus')
+                config.set('AppStatus', 'disclaimer_accepted', 'true')
+                with open('API_KEY.ini', 'w') as configfile:
+                    config.write(configfile)
+            else:
+                sys.exit(0)
+
     def open_settings_window(self):
         if SettingsDialog(self).exec(): self.load_models_async()
 
@@ -512,6 +585,17 @@ class VtotalscanGUI(QMainWindow):
         input_text = self.repo_url_input.toPlainText()
         repo_urls, invalid_lines, duplicate_lines = parse_repo_urls(input_text)
 
+        github_urls = [url for url in repo_urls if 'github.com' in urlparse(url).hostname]
+        if len(github_urls) > GITHUB_SCAN_THRESHOLD:
+            msg = (f"Você está tentando analisar {len(github_urls)} repositórios do GitHub de uma vez.\n\n"
+                   f"Devido aos limites de requisição da API do GitHub, análises com mais de {GITHUB_SCAN_THRESHOLD} "
+                   f"repositórios podem falhar ou retornar resultados incompletos.\n\n"
+                   f"Deseja continuar mesmo assim?")
+            reply = QMessageBox.warning(self, "Aviso de Rate Limiting", msg, QMessageBox.Ok | QMessageBox.Cancel)
+            if reply == QMessageBox.Cancel:
+                self.log("Análise cancelada pelo usuário devido ao aviso de rate limiting.")
+                return
+
         if duplicate_lines:
             ignored_text = "\n".join(f"- {line}" for line in duplicate_lines)
             QMessageBox.information(
@@ -544,12 +628,12 @@ class VtotalscanGUI(QMainWindow):
             return
             
         self.log(f"Análise de {len(repo_urls)} repositório(s) iniciada...")
-        self.progress_dialog = QProgressDialog("Analisando repositórios...", "Cancelar", 0, len(repo_urls), self)
+        self.progress_dialog = QProgressDialog("Analisando repositórios...", "Cancelar", 0, 100, self)
         self.progress_dialog.setWindowTitle("Aguarde"); self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.repo_thread = RepoAnalysisWorker(repo_urls, save_path)
         self.progress_dialog.canceled.connect(self.repo_thread.requestInterruption)
         self.repo_thread.log_message.connect(self.log)
-        self.repo_thread.progress_update.connect(self.update_progress_dialog)
+        self.repo_thread.progress_update.connect(self.update_repo_progress_dialog)
         self.repo_thread.finished.connect(self.on_analysis_finished)
         self.repo_thread.finished.connect(self.repo_thread.deleteLater)
         self.repo_thread.start()
@@ -614,6 +698,17 @@ class VtotalscanGUI(QMainWindow):
         if hasattr(self, 'progress_dialog') and self.progress_dialog.isVisible():
             self.progress_dialog.setMaximum(total); self.progress_dialog.setValue(current); self.progress_dialog.setLabelText(f"Analisando {current} de {total}...")
     
+    def update_repo_progress_dialog(self, phase, current, total):
+        if hasattr(self, 'progress_dialog') and self.progress_dialog.isVisible():
+            if self.progress_dialog.maximum() != total:
+                self.progress_dialog.setMaximum(total)
+            self.progress_dialog.setValue(current)
+            
+            phase_text = ""
+            if phase == "repos": phase_text = "Fase 1/3: Inspecionando Arquivos"
+            elif phase == "iocs": phase_text = "Fase 2/3: Verificando IOCs"
+            self.progress_dialog.setLabelText(f"{phase_text} ({current}/{total})")
+
     def on_analysis_finished(self, success, filepath):
         if hasattr(self, 'progress_dialog'): self.progress_dialog.close()
         
