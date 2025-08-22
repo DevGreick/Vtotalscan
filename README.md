@@ -188,19 +188,43 @@ https://some-random-domain.net/path
 ```
 https://github.com/DevGreick/threatspy-test-env
 ```
+
 3. Clique em **Analisar Repositórios**. A ferramenta detecta segredos e IOCs em Base64, gerando um relatório sem clonar o repositório
+
+**Exemplo 3: Analisando a Reputação de Arquivos (PDFs, executáveis, etc.)**
+
+1. Na aba **Análise de IOCs**, clique no botão **Verificar Reputação de Arquivos**.
+2. Selecione um ou mais arquivos do seu computador (PDFs, instaladores `.exe`, `.zip`, etc.).
+3. O ThreatSpy **não envia seus arquivos**, ele apenas calcula a impressão digital (hash SHA256) de cada um localmente.
+4. Em seguida, ele consulta o VirusTotal e o MalwareBazaar usando essa impressão digital para saber se os arquivos já são conhecidos como maliciosos.
+5. O resultado é salvo em um relatório Excel, indicando se há detecções para cada arquivo analisado.
 
 <a id="features"></a>
 
 ## ✨ Funcionalidades Principais
 
-- Análise massivamente paralela de indicadores
-- Análise de repositórios GitHub e GitLab sem clonar
-- GUI moderna em PySide6 com tema escuro e abas
-- Relatórios em Excel (.xlsx) e PDF
-- Resumos com IA contextual via Ollama
-- Gestão segura de chaves por `keyring`
+O ThreatSpy opera com três modos de análise distintos, cada um com um objetivo específico:
 
+#### 1. Análise de IOCs (IPs e URLs)
+- Verifica a **reputação** de endereços IP e URLs em múltiplas fontes de inteligência de ameaças (VirusTotal, AbuseIPDB, URLHaus, Shodan).
+- Ideal para saber se um servidor ou link é conhecido por atividades maliciosas, como hospedar malware, phishing ou operar como um servidor de Comando e Controle (C2), ele analisa o endereço, não o conteúdo que está lá.
+
+#### 2. Análise de Repositórios (GitHub & GitLab)
+- Realiza uma análise estática do **código-fonte e arquivos de configuração** de um repositório sem a necessidade de cloná-lo.
+- Ideal para Encontrar **segredos expostos** (chaves de API, senhas), comandos perigosos em scripts de instalação (`npm install --force`), e links suspeitos ofuscados em Base64, **Importante:** este modo não analisa o conteúdo de arquivos binários como PDFs ou executáveis dentro do repositório.
+
+#### 3. Análise de Reputação de Arquivos
+- Calcula a impressão digital (hash SHA256) de qualquer arquivo local e verifica se essa assinatura já é conhecida como maliciosa em bancos de dados como o VirusTotal e o MalwareBazaar.
+- Ideal para verificar a segurança de arquivos que você baixou **antes de abri-los**, como documentos PDF, planilhas, instaladores `.exe`, arquivos `.zip`, etc.
+
+---
+
+### Outras Funcionalidades
+
+- **GUI Moderna:** Interface gráfica intuitiva construída com PySide6, com tema escuro e organização em abas.
+- **Relatórios Detalhados:** Gera relatórios consolidados em formato Excel (`.xlsx`) e resumos em PDF, ideais para documentação e compartilhamento.
+- **Resumos com IA Local:** Utiliza o Ollama para rodar modelos de linguagem localmente, criando resumos executivos e planos de ação a partir dos dados da análise, garantindo total privacidade.
+- **Gestão Segura de Chaves:** Usa a biblioteca `keyring` para armazenar suas chaves de API de forma segura no cofre de credenciais nativo do seu sistema operacional.
 <a id="responsavel"></a>
 
 ## ⚖️ Use com responsabilidade
