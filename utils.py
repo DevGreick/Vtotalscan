@@ -25,7 +25,7 @@ def is_file_writable(filepath):
 
 def parse_repo_urls(text):
     """
-    Analisa um bloco de texto, valida cada linha como uma URL de repositório
+    Analisa um bloco de texto, valida cada linha como uma URL de repositório (completa ou curta)
     e retorna listas de URLs válidas, linhas inválidas e linhas duplicadas.
     """
     seen_urls = set()
@@ -33,23 +33,31 @@ def parse_repo_urls(text):
     invalid_lines = []
     duplicate_lines = []
     
-    pattern = re.compile(
-        r'^(?:https?:\/\/)?'
-        r'(?:www\.)?'
-        r'(github\.com|gitlab\.com)\/'
-        r'([\w.-]+(?:\/[\w.-]+)+)'
-        r'(?:\.git)?\/?$',
-        re.IGNORECASE
+    full_url_pattern = re.compile(
+        r'^(?:https?:\/\/)?(?:www\.)?(github\.com|gitlab\.com)\/([\w.-]+\/[\w.-]+(?:[\/\w.-])*)'
     )
+    
+    shorthand_pattern = re.compile(r'^([\w.-]+\/[\w.-]+)')
 
     for line in text.splitlines():
         line = line.strip()
         if not line:
             continue
             
-        match = pattern.match(line)
-        if match:
-            normalized_url = f"https://{match.group(1)}/{match.group(2)}".lower()
+        full_match = full_url_pattern.match(line)
+        shorthand_match = shorthand_pattern.match(line)
+
+        if full_match:
+            # Limpa a URL removendo .git no final se existir
+            repo_path = full_match.group(2).removesuffix('.git')
+            normalized_url = f"https://{full_match.group(1)}/{repo_path}".lower()
+            if normalized_url in seen_urls:
+                duplicate_lines.append(line)
+            else:
+                valid_urls.append(normalized_url)
+                seen_urls.add(normalized_url)
+        elif shorthand_match:
+            normalized_url = f"https://github.com/{shorthand_match.group(1)}".lower()
             if normalized_url in seen_urls:
                 duplicate_lines.append(line)
             else:

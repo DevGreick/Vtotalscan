@@ -10,8 +10,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
 
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                                   QPushButton, QTextEdit, QLabel, QTabWidget, QComboBox,
-                                   QFileDialog, QMessageBox, QProgressDialog, QDialog, QLineEdit, QFormLayout)
+                                   QPushButton, QPlainTextEdit, QLabel, QTabWidget, QComboBox,
+                                   QFileDialog, QMessageBox, QProgressDialog, QDialog, QLineEdit, QFormLayout, QTextEdit)
 from PySide6.QtGui import QIcon, QFont, QPixmap, QPalette, QColor
 from PySide6.QtCore import Qt, QThread, Signal
 
@@ -202,7 +202,7 @@ class AISummaryWorker(QThread):
         self.model = model
     
     def run(self):
-        self.log_message.emit("Preparando dossiê para análise da IA...")
+        self.log_message.emit("Preparando dossiê detalhado para análise da IA...")
         if not any(self.analysis_data.values()):
             self.finished.emit("Erro: Nenhuma análise foi realizada ainda.")
             return
@@ -216,23 +216,66 @@ class AISummaryWorker(QThread):
                 facts += f"- Repositório: {repo.get('url')}\n"
                 facts += f"  - Nível de Risco Estático: {repo.get('risk_score', 0)}/100\n"
                 if secrets := repo.get('exposed_secrets'):
-                    facts += f"  - Segredos Expostos: {len(secrets)} encontrados.\n"
+                    facts += "  - Segredos Expostos Encontrados:\n"
+                    for secret in secrets:
+                        facts += f"    - Tipo: '{secret.get('type')}' no arquivo '{secret.get('file')}'\n"
                 if files := repo.get('suspicious_files'):
-                    facts += f"  - Arquivos Suspeitos: {len(files)} ({', '.join(files)})\n"
+                    facts += f"  - Arquivos Suspeitos: {', '.join(files)}\n"
+                if iocs := repo.get('extracted_iocs'):
+                    facts += "  - IOCs Ocultos (Base64) Encontrados:\n"
+                    for ioc in iocs:
+                        rep = ioc.get('reputation', {})
+                        vt_malicious = rep.get('virustotal', {}).get('data', {}).get('attributes', {}).get('stats', {}).get('malicious', 0)
+                        facts += f"    - URL: '{ioc.get('ioc')}' no arquivo '{ioc.get('source_file')}' (Detecções VT: {vt_malicious})\n"
+            facts += "\n"
+
+        ip_data = self.analysis_data.get('ips', {})
+        if ip_data:
+            facts += f"**Análise de Endereços IP ({len(ip_data)} total):**\n"
+            for ip, results in ip_data.items():
+                vt_res = results.get('virustotal', {})
+                abuse_res = results.get('abuseipdb', {})
+                vt_malicious = vt_res.get('data', {}).get('attributes', {}).get('last_analysis_stats', {}).get('malicious', 'N/A')
+                abuse_score = abuse_res.get('data', {}).get('abuseConfidenceScore', 'N/A')
+                facts += f"- IP: {ip} | Detecções VT: {vt_malicious} | Score AbuseIPDB: {abuse_score}%\n"
             facts += "\n"
         
-        prompt = (f"Você é um analista de cibersegurança. Sua tarefa é gerar um relatório estruturado com base no dossiê abaixo.\n\n"
-                  f"ESTRUTURA OBRIGATÓRIA DO RELATÓRIO:\n"
-                  f"### Análise Geral\n"
-                  f"(Um parágrafo resumindo os achados mais críticos de TODAS as categorias analisadas).\n\n"
-                  f"### Recomendações para Indicadores Maliciosos\n"
-                  f"(Crie subseções para cada categoria com achados e liste as recomendações).\n\n"
-                  f"### Conclusão e Próximos Passos\n"
-                  f"(Um parágrafo final com as ações mais importantes).\n\n"
-                  f"IMPORTANTE: Não adicione assinaturas, cargos ou data.\n\n"
-                  f"--- INÍCIO DO DOSSIÊ ---\n{facts}\n--- FIM DO DOSSIÊ ---")
+        url_data = self.analysis_data.get('urls', {})
+        if url_data:
+            facts += f"**Análise de URLs ({len(url_data)} total):**\n"
+            for url, results in url_data.items():
+                vt_res = results.get('virustotal', {})
+                uh_res = results.get('urlhaus', {})
+                vt_malicious = vt_res.get('data', {}).get('attributes', {}).get('stats', {}).get('malicious', 'N/A')
+                uh_status = uh_res.get('url_status', 'N/A')
+                facts += f"- URL: {url} | Detecções VT: {vt_malicious} | Status URLHaus: {uh_status}\n"
+            facts += "\n"
+
+        file_data = self.analysis_data.get('files', {})
+        if file_data:
+            facts += f"**Análise de Arquivos ({len(file_data)} total):**\n"
+            for f_hash, results in file_data.items():
+                filename = results.get('filename', 'N/A')
+                vt_res = results.get('virustotal', {})
+                mb_res = results.get('malwarebazaar', {})
+                vt_malicious = vt_res.get('data', {}).get('attributes', {}).get('last_analysis_stats', {}).get('malicious', 'N/A')
+                mb_threat = (mb_res.get('data', [{}]) or [{}])[0].get('signature', 'N/A')
+                facts += f"- Arquivo: {filename} | Detecções VT: {vt_malicious} | Ameaça (MB): {mb_threat}\n"
+            facts += "\n"
         
-        self.log_message.emit(f"Enviando dossiê para o modelo {self.model}...")
+        prompt = (f"Você é um analista de cibersegurança sênior. Sua tarefa é gerar um relatório executivo detalhado e acionável com base no dossiê técnico abaixo.\n\n"
+                  f"ESTRUTURA OBRIGATÓRIA DO RELATÓRIO:\n"
+                  f"### Análise Geral e Nível de Risco\n"
+                  f"(Um parágrafo conciso resumindo os achados mais críticos de TODAS as categorias e avaliando o nível de risco geral como BAIXO, MÉDIO, ALTO ou CRÍTICO).\n\n"
+                  f"### Detalhamento dos Achados Críticos\n"
+                  f"(Crie subseções para cada categoria com achados (Repositórios, IPs, URLs, Arquivos) e explique o impacto técnico de cada item. Por exemplo, explique o que um invasor poderia fazer com uma chave AWS exposta).\n\n"
+                  f"### Plano de Ação e Recomendações\n"
+                  f"(Crie uma lista numerada e priorizada de ações de remediação. As recomendações devem ser específicas e diretas. Ex: '1. Revogar imediatamente a chave AWS (AKIA...) encontrada no arquivo .env do repositório X. 2. Remover o arquivo .bash_history do histórico do git...').\n\n"
+                  f"### Recomendações de Prevenção a Longo Prazo\n"
+                  f"(Sugira 2 ou 3 medidas para evitar que problemas semelhantes ocorram no futuro, como a implementação de git-secrets, revisões de código focadas em segurança e uso de cofres de segredos).\n\n"
+                  f"--- INÍCIO DO DOSSIÊ TÉCNICO ---\n{facts}\n--- FIM DO DOSSIÊ TÉCNICO ---")
+        
+        self.log_message.emit(f"Enviando dossiê detalhado para o modelo {self.model}...")
         summary = ApiClient().get_ai_summary(self.model, prompt)
         self.finished.emit(summary)
 
@@ -371,8 +414,9 @@ class VtotalscanGUI(QMainWindow):
         repo_tab = QWidget()
         repo_layout = QVBoxLayout(repo_tab)
         repo_label = QLabel("Insira as URLs dos Repositórios (uma por linha)"); repo_label.setFont(QFont("Segoe UI", 10, QFont.Bold))
-        self.repo_url_input = QTextEdit()
-        self.repo_url_input.setPlaceholderText("https://github.com/owner/repo\nhttps://gitlab.com/owner/repo")
+        self.repo_url_input = QPlainTextEdit()
+        self.repo_url_input.setStyleSheet("text-decoration: none;")
+        self.repo_url_input.setPlaceholderText("https://github.com/owner/repo\nowner/repo (assume GitHub)\nhttps://gitlab.com/owner/repo")
         
         repo_action_layout = QHBoxLayout()
         btn_load_repos = QPushButton("Importar de Arquivo")
@@ -507,6 +551,7 @@ class VtotalscanGUI(QMainWindow):
         self.repo_thread.log_message.connect(self.log)
         self.repo_thread.progress_update.connect(self.update_progress_dialog)
         self.repo_thread.finished.connect(self.on_analysis_finished)
+        self.repo_thread.finished.connect(self.repo_thread.deleteLater)
         self.repo_thread.start()
         self.progress_dialog.show()
 
@@ -528,7 +573,10 @@ class VtotalscanGUI(QMainWindow):
         self.progress_dialog.setWindowTitle("Aguarde"); self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.analysis_thread = AnalysisWorker(self.text_area.toPlainText(), filepath)
         self.progress_dialog.canceled.connect(self.analysis_thread.requestInterruption)
-        self.analysis_thread.log_message.connect(self.log); self.analysis_thread.progress_update.connect(self.update_progress_dialog); self.analysis_thread.finished.connect(self.on_analysis_finished)
+        self.analysis_thread.log_message.connect(self.log)
+        self.analysis_thread.progress_update.connect(self.update_progress_dialog)
+        self.analysis_thread.finished.connect(self.on_analysis_finished)
+        self.analysis_thread.finished.connect(self.analysis_thread.deleteLater)
         self.analysis_thread.start()
         self.progress_dialog.show()
     
@@ -555,7 +603,10 @@ class VtotalscanGUI(QMainWindow):
         self.progress_dialog.setWindowTitle("Aguarde"); self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.file_thread = FileAnalysisWorker(filepaths, save_path)
         self.progress_dialog.canceled.connect(self.file_thread.requestInterruption)
-        self.file_thread.log_message.connect(self.log); self.file_thread.progress_update.connect(self.update_progress_dialog); self.file_thread.finished.connect(self.on_analysis_finished)
+        self.file_thread.log_message.connect(self.log)
+        self.file_thread.progress_update.connect(self.update_progress_dialog)
+        self.file_thread.finished.connect(self.on_analysis_finished)
+        self.file_thread.finished.connect(self.file_thread.deleteLater)
         self.file_thread.start()
         self.progress_dialog.show()
 
@@ -586,6 +637,13 @@ class VtotalscanGUI(QMainWindow):
         if not self.last_ioc_results and not self.last_file_results and not self.last_repo_results:
             QMessageBox.warning(self, "Aviso", "Realize uma análise primeiro."); return
         
+        selected_model_text = self.selected_model.currentText()
+        if "Erro:" in selected_model_text or "não encontrado" in selected_model_text:
+            QMessageBox.warning(self, "Configuração de IA Inválida",
+                                "O endpoint da IA não está configurado ou não foi encontrado.\n\n"
+                                "Por favor, verifique as Configurações.")
+            return
+
         combined_results = {
             "ips": self.last_ioc_results.get('ips', {}) if self.last_ioc_results else {},
             "urls": self.last_ioc_results.get('urls', {}) if self.last_ioc_results else {},
@@ -594,12 +652,23 @@ class VtotalscanGUI(QMainWindow):
         }
         
         self.btn_ai_summary.setEnabled(False); self.btn_ai_summary_pdf.setEnabled(False); self.ai_summary_box.setPlainText("Analisando com IA...")
-        self.ai_thread = AISummaryWorker(combined_results, self.selected_model.currentText()); self.ai_thread.log_message.connect(self.log); self.ai_thread.finished.connect(self.on_ai_finished); self.ai_thread.start()
+        self.ai_thread = AISummaryWorker(combined_results, selected_model_text)
+        self.ai_thread.log_message.connect(self.log)
+        self.ai_thread.finished.connect(self.on_ai_finished)
+        self.ai_thread.finished.connect(self.ai_thread.deleteLater)
+        self.ai_thread.start()
     
     def start_ai_task_pdf(self):
         if not self.last_ioc_results and not self.last_file_results and not self.last_repo_results:
             QMessageBox.warning(self, "Aviso", "Realize uma análise primeiro para gerar o PDF."); return
             
+        selected_model_text = self.selected_model.currentText()
+        if "Erro:" in selected_model_text or "não encontrado" in selected_model_text:
+            QMessageBox.warning(self, "Configuração de IA Inválida",
+                                "O endpoint da IA não está configurado ou não foi encontrado.\n\n"
+                                "Por favor, verifique as Configurações.")
+            return
+
         filepath, _ = QFileDialog.getSaveFileName(self, "Salvar Resumo em PDF", "Resumo_IA.pdf", "Arquivos PDF (*.pdf)")
         if not filepath: self.log("Operação cancelada."); return
         
@@ -611,8 +680,11 @@ class VtotalscanGUI(QMainWindow):
         }
 
         self.btn_ai_summary.setEnabled(False); self.btn_ai_summary_pdf.setEnabled(False); self.ai_summary_box.setPlainText("Gerando PDF com IA...")
-        self.ai_thread = AISummaryWorker(combined_results, self.selected_model.currentText()); self.ai_thread.log_message.connect(self.log)
-        self.ai_thread.finished.connect(lambda summary: self.on_ai_finished_pdf(summary, filepath)); self.ai_thread.start()
+        self.ai_thread = AISummaryWorker(combined_results, selected_model_text)
+        self.ai_thread.log_message.connect(self.log)
+        self.ai_thread.finished.connect(lambda summary: self.on_ai_finished_pdf(summary, filepath))
+        self.ai_thread.finished.connect(self.ai_thread.deleteLater)
+        self.ai_thread.start()
     
     def on_ai_finished(self, summary):
         self.ai_summary_box.setPlainText(summary); self.tab_view.setCurrentIndex(1); self.btn_ai_summary.setEnabled(True); self.btn_ai_summary_pdf.setEnabled(True)
