@@ -80,6 +80,10 @@ chmod +x ThreatSpy
 ### A partir do Código-Fonte
 Pré-requisitos: Python 3.8+ e Git. Para a função de IA, o **Ollama** deve estar instalado e rodando.
 
+<a id="instalacao-codigo"></a>
+### A partir do Código-Fonte
+Pré-requisitos: Python 3.8+ e Git. Para a função de IA, o **Ollama** deve estar instalado e rodando.
+
 ```bash
 # Clone o repositório
 git clone https://github.com/DevGreick/ThreatSpy.git
@@ -92,9 +96,17 @@ source venv/bin/activate  # No Windows: venv\Scripts\activate
 # Instale as dependências
 pip install -r requirements.txt
 
+# (Opcional) Configure o Ollama para IA local
+ollama pull llama3
+ollama run llama3 "Hello ThreatSpy"
+
 # Execute o programa
 python main_gui.py
+
 ```
+
+
+
 
 <a id="config"></a>
 ## Configuração Essencial
