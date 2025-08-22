@@ -183,13 +183,14 @@ https://github.com/DevGreick/threatspy-test-env
 
 ## ⚠️ Aviso de Segurança e Privacidade
 
-Esta ferramenta foi projetada para analistas de segurança e se comunica com múltiplos serviços de terceiros para enriquecer os dados. Esteja ciente de que:
+Esta é uma ferramenta poderosa de verificação de segurança, para funcionar, ela precisa se comunicar com serviços de terceiros para analisar os indicadores que você fornece,  esteja ciente de que:
 
 * **URLs e IPs**: Todos os IPs e URLs fornecidos como entrada, **incluindo URLs extraídas automaticamente do conteúdo de repositórios (após decodificação de Base64)**, são enviados para serviços externos como VirusTotal, AbuseIPDB, URLhaus e Shodan.
 * **Não use em ambientes sensíveis sem supervisão**: Se você analisar repositórios privados ou dados que contenham informações confidenciais (como URLs de infraestrutura interna), essas informações podem ser enviadas para as APIs mencionadas.
 * **Endpoint de IA**: A funcionalidade de resumo por IA envia um dossiê detalhado da análise (contendo todos os resultados) para o endpoint configurado. O padrão é um serviço Ollama local (`http://localhost:11434`), mas se você o alterar para um serviço remoto, os dados da análise sairão da sua máquina.
 
 **Use por sua conta e risco.** O mantenedor não se responsabiliza por qualquer vazamento de dados decorrente do uso desta ferramenta.
+
 <a id="tech"></a>
 ## 🛠️ Tecnologias Utilizadas
 
