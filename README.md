@@ -53,32 +53,20 @@
 <a id="start"></a>
 ## ⚡ Comece a Usar em 30 Segundos
 
-### Para Usuários (Executável)
-A maneira mais rápida de começar é baixando o pacote portátil para o seu sistema.
-
-1. Baixe o arquivo `.zip` na página de **Releases**.
-2. Descompacte em uma pasta de sua preferência e execute o arquivo `ThreatSpy`.
-3. Na primeira vez, vá em **Configurações** e adicione sua chave de API do **VirusTotal**. É a única obrigatória.
-
-
-
-<a id="instalacao"></a>
-## 📦 Instalação
-
 ### Windows
-1. Acesse a página de **Releases**.
-2. Baixe o arquivo `ThreatSpy-Windows.zip`.
+1. Acesse a página de <a href="https://github.com/DevGreick/ThreatSpy/releases"><strong> **Releases**</strong></a>
+2. Baixe o arquivo `ThreatSpyWindows.zip`.
 3. Descompacte o arquivo e execute `ThreatSpy.exe`.
 
 ### macOS
-1. Acesse a página de **Releases**.
-2. Baixe o arquivo `ThreatSpy-macOS.zip`.
+1. Acesse a página de <a href="https://github.com/DevGreick/ThreatSpy/releases"><strong> **Releases**</strong></a>
+2. Baixe o arquivo `ThreatSpy.app.zip`.
 3. Descompacte e execute o `ThreatSpy.app`.
 4. **Nota**: o macOS pode exibir um aviso de segurança. Se isso ocorrer, clique com o botão direito, selecione **Abrir** e confirme na caixa de diálogo para permitir a execução.
 
 ### Linux
-1. Acesse a página de **Releases**.
-2. Baixe o arquivo `ThreatSpy-Linux.zip`.
+1. Acesse a página de <a href="https://github.com/DevGreick/ThreatSpy/releases"><strong> **Releases**</strong></a>
+2. Baixe o arquivo `ThreatSpyLinux.zip`.
 3. Descompacte e, no terminal, torne o arquivo executável:
 ```bash
 chmod +x ThreatSpy
