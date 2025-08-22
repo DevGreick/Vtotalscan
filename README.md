@@ -52,18 +52,20 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 <a id="caso-real--o-golpe-do-repositório-falso"></a>
 
-## 🚨 Caso Real – O Golpe do Repositório Falso
+## 🚨 O Golpe do Repositório Falso
 
-Golpes de recrutamento vêm usando repositórios maliciosos como “teste técnico” para devs. O roteiro é sempre parecido, o candidato clona o repo e roda `npm install`, muitas vezes com instrução de `npm install --force`. Dentro do projeto aparece um `.env` com string em Base64 que leva a um domínio suspeito e scripts de instalação que podem abrir brechas locais.
+Golpes de recrutamento vêm usando repositórios maliciosos como teste técnico para devs. O roteiro é sempre parecido, o candidato clona o repo e roda `npm install`, muitas vezes com instrução de `npm install --force`. Dentro do projeto aparece um `.env` com string em Base64 que leva a um domínio suspeito e scripts de instalação que podem abrir brechas locais.
 
-Como o ThreatSpy ajuda sem clonar nem executar
+Como o ThreatSpy ajuda sem clonar nem executar: 
+
 - detecta `.env` e procura chaves, tokens e segredos
 - decodifica Base64 e extrai IOCs para checagem de reputação
 - inspeciona `package.json` e alerta para `preinstall` e `postinstall`
 - lê `README.md` e marca comandos perigosos como `npm install --force` e `curl ... | sh`
 - gera relatório com score de risco e links defanged
 
-Ação imediata
+Ação imediata:
+
 - cole a URL do repo na aba **Análise de Repositório** e veja o risco antes de rodar qualquer comando
 
 <a id="funcionalidades-principais"></a>
