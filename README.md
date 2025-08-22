@@ -56,7 +56,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 Golpes de recrutamento vêm usando repositórios maliciosos como teste técnico para devs. O roteiro é sempre parecido, o candidato clona o repo e roda `npm install`, muitas vezes com instrução de `npm install --force`. Dentro do projeto aparece um `.env` com string em Base64 que leva a um domínio suspeito e scripts de instalação que podem abrir brechas locais.
 
-Com o ThreatSpy, você não precisa clonar ou executar nada. Basta usar a aba "Análise de Repositório", colar a URL suspeita e a ferramenta irá verificar pois ele :
+Com o ThreatSpy, você não precisa clonar ou executar nada. Basta usar a aba "Análise de Repositório", colar a URL suspeita e a ferramenta irá verificar :
 
 - detecta `.env` e procura chaves, tokens e segredos
 - decodifica Base64 e extrai IOCs para checagem de reputação
