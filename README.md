@@ -90,9 +90,6 @@ chmod +x ThreatSpy
 ./ThreatSpy
 ```
 
-<a id="instalacao-codigo"></a>
-### A partir do Código-Fonte
-Pré-requisitos: Python 3.8+ e Git. Para a função de IA, o **Ollama** deve estar instalado e rodando.
 
 <a id="instalacao-codigo"></a>
 ### A partir do Código-Fonte
