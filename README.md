@@ -214,7 +214,7 @@ https://github.com/DevGreick/threatspy-test-env
 
 ## ⚠️ Aviso de Segurança e Privacidade
 
-Esta é uma ferramenta de verificação de segurança. Para funcionar, ela se comunica com serviços de terceiros para analisar os indicadores que você fornece. Esteja ciente de que:
+Esta é uma ferramenta poderosa de verificação de segurança. Para funcionar, ela se comunica com serviços de terceiros para analisar os indicadores que você fornece. Esteja ciente de que:
 
 - **URLs e IPs:** IPs e URLs de entrada, incluindo URLs extraídas automaticamente de repositórios (após decodificação de Base64), podem ser enviados para serviços externos como VirusTotal, AbuseIPDB, URLhaus e Shodan
 - **Cuidado com dados sensíveis:** Se você analisar repositórios privados ou dados confidenciais, essas informações podem ser enviadas às APIs mencionadas
