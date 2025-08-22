@@ -5,6 +5,7 @@
 
 <div align="center">
   <strong>Uma ferramenta de análise de ameaças que automatiza a consulta de IOCs e repositórios em múltiplas fontes, gera relatórios e cria resumos com IA local.</strong>
+  
 </div>
 
 <br>
@@ -26,6 +27,9 @@
   </a>
 </div>
 
+> [!TIP]
+> Abra o Sumário abaixo para navegar rápido.
+
 <details>
 <summary><strong>Sumário</strong> <sub>(clique para expandir)</sub></summary>
 <br/>
@@ -36,7 +40,7 @@
   - [macOS](#macos)
   - [Linux](#linux)
   - [A partir do Código-Fonte](#codigo-fonte)
-- [Configuração Essencial](#config)
+- [Configuração Essencial](#configuracao)
 - [Como Usar](#como-usar)
 - [Funcionalidades Principais](#funcionalidades)
 - [Tecnologias Utilizadas](#tecnologias)
@@ -53,7 +57,7 @@ A maneira mais rápida de começar é baixando a versão mais recente para o seu
 
 1. Baixe o executável na página de **[Releases](https://github.com/DevGreick/ThreatSpy/releases)**.
 2. Descompacte e execute o arquivo.
-3. Na primeira vez, vá em **Configurações** e adicione a chave do **VirusTotal** (única obrigatória).
+3. Na primeira vez, vá em **Configurações** e adicione sua chave de API do **VirusTotal**. É a única obrigatória.
 
 <a id="instalacao"></a>
 ## 📦 Instalação
@@ -61,30 +65,27 @@ A maneira mais rápida de começar é baixando a versão mais recente para o seu
 <a id="windows"></a>
 ### Windows
 
-1. Acesse **Releases**.
-2. Baixe o `.zip` da versão mais recente para Windows.
-3. Descompacte.
+1. Acesse a página de Releases.
+2. Baixe o arquivo `.zip` para Windows.
+3. Descompacte em uma pasta.
 4. Execute `ThreatSpy.exe`.
 
 <a id="macos"></a>
 ### macOS
 
-1. Acesse **Releases**.
-2. Baixe o `.zip` da versão para macOS.
-3. Descompacte e execute `ThreatSpy.app`.
-4. Se houver aviso de segurança, clique com o botão direito em **Abrir** e confirme.
+1. Acesse a página de Releases.
+2. Baixe o arquivo `.zip` para macOS.
+3. Descompacte e abra `ThreatSpy.app`.
+4. Se o macOS avisar sobre segurança, clique com o botão direito em **Abrir** e confirme.
 
 <a id="linux"></a>
 ### Linux
 
-1. Acesse **Releases**.
-2. Baixe o `.zip` da versão para Linux.
-3. Descompacte e torne executável:
+1. Acesse a página de Releases.
+2. Baixe o `.zip` para Linux e extraia.
+3. Torne o binário executável e rode:
    ```bash
    chmod +x ./ThreatSpy
-   ```
-4. Rode o app:
-   ```bash
    ./ThreatSpy
    ```
 
@@ -109,42 +110,42 @@ pip install -r requirements.txt
 python main_gui.py
 ```
 
-<a id="config"></a>
+<a id="configuracao"></a>
 ## ⚙️ Configuração Essencial
 
-Após instalar, clique em **Configurações** (canto superior direito) e insira suas chaves.
+Após instalar, clique em **Configurações** no canto superior direito e adicione as chaves.
 
-- **Chave principal (obrigatória)**: **VirusTotal**. Habilita análise de IPs, URLs e arquivos.
+- **Chave principal (essencial)**: **VirusTotal**. Necessária para análise de IPs, URLs e arquivos.
 - **Chaves opcionais (recomendadas)**:
-  - **AbuseIPDB**. Score de abuso e geolocalização de IPs.
-  - **Shodan**. Portas, serviços e possíveis CVEs expostos.
+  - **AbuseIPDB**. Score de abuso e localização de IPs.
+  - **Shodan**. Portas, serviços e possíveis CVEs.
   - **URLHaus**. URLs ativamente maliciosas.
-  - **MalwareBazaar**. Identificação de famílias de malware por hash.
-  - **GitHub/GitLab**. Necessárias para análise de repositórios sem bloqueios de API.
-  - **Ollama (IA)**. Resumos automáticos com IA local.
+  - **MalwareBazaar**. Identificação de malware por hash.
+  - **GitHub/GitLab**. Essenciais para análise de repositórios sem bloqueios de API.
+  - **Ollama**. Resumos por IA local (endpoint padrão já configurado).
 - As chaves são salvas via **keyring** do sistema.
-- **Privacidade**. Consultas saem do seu computador para as APIs configuradas. Nenhum arquivo local é enviado, exceto quando você seleciona para cálculo de hash, realizado localmente.
 
 <a id="como-usar"></a>
 ## 🛠️ Como Usar
 
-A ferramenta possui dois fluxos principais:
+A ferramenta possui dois fluxos de análise principais.
 
-- **Analisar IPs e URLs**. Na aba **Análise de IOCs**, cole os indicadores e clique em **Analisar Alvos**.
-- **Analisar Arquivos**. Em **Análise de IOCs**, clique em **Verificar Reputação de Arquivos** e selecione um ou mais arquivos.
-- **Analisar Repositórios**. Vá para a aba **Análise de Repositório**, cole as URLs do GitHub/GitLab e clique em **Analisar Repositórios**.
-- Após qualquer análise, use **Resumo Gerado por IA** para exportar texto ou PDF.
+| Tipo de Análise        | Como Fazer |
+|------------------------|------------|
+| IPs e URLs             | Na aba **Análise de IOCs**, cole os indicadores e clique em **Analisar Alvos**. |
+| Arquivos               | Em **Análise de IOCs**, clique em **Verificar Reputação de Arquivos** e selecione um ou mais arquivos. |
+| Repositórios           | Na aba **Análise de Repositório**, cole as URLs do GitHub/GitLab e clique em **Analisar Repositórios**. |
+| Relatórios e Resumos   | Após a análise, use **Resumo Gerado por IA** para exportar texto ou PDF. |
 
 <a id="funcionalidades"></a>
 ## ✨ Funcionalidades Principais
 
-- Análise paralela de muitos indicadores.
-- Análise de repositórios remota (sem clonar): segredos, arquivos sensíveis, IOCs Base64 e scripts maliciosos.
-- GUI moderna em **PySide6** com abas.
-- Relatórios em **Excel** (.xlsx) e **PDF**, com *defang* automático.
+- Análise paralela de indicadores.
+- Análise remota de repositórios: segredos, arquivos sensíveis, IOCs em Base64 e scripts maliciosos.
+- GUI em **PySide6** com tema escuro e abas.
+- Relatórios em **Excel (.xlsx)** e **PDF**, com *defang* automático.
 - Resumos com IA local via **Ollama**.
-- Chaves guardadas com **keyring**.
-- Logs e retentativas para lidar com limites de API.
+- Chaves salvas com **keyring**. Retentativas e logs para lidar com limites de API.
 
 <a id="tecnologias"></a>
 ## 🛠️ Tecnologias Utilizadas
