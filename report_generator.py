@@ -1,4 +1,3 @@
-# report_generator.py
 import xlsxwriter
 import hashlib
 import re
@@ -51,9 +50,9 @@ class ReportGenerator:
 
                 if self.repo_results_dict:
                     ws_repo = workbook.add_worksheet("Relatório de Repositório")
-                    headers_repo = ["Repositório URL", "Risco Estático", "Resumo", "Segredos Expostos", "Arquivos Suspeitos", "Dependências"]
+                    headers_repo = ["Repositório URL", "Risco Estático", "Resumo", "Segredos Expostos", "Arquivos Suspeitos", "Dependências", "IOCs Extraídos"]
                     ws_repo.write_row('A1', headers_repo, header_format)
-                    ws_repo.set_column('A:A', 50); ws_repo.set_column('B:B', 15); ws_repo.set_column('C:F', 40)
+                    ws_repo.set_column('A:A', 50); ws_repo.set_column('B:B', 15); ws_repo.set_column('C:G', 40)
                     
                     row_num = 1
                     for res in self.repo_results_dict:
@@ -63,6 +62,15 @@ class ReportGenerator:
                         
                         secrets_str = "\n".join([f"- {s['type']} em {s['file']}" for s in res.get('exposed_secrets', [])])
                         deps_str = "\n".join([f"{file}: {', '.join(pkgs)}" for file, pkgs in res.get('dependencies', {}).items()])
+                        
+                        iocs_list = []
+                        for ioc_info in res.get('extracted_iocs', []):
+                            ioc = ioc_info.get('ioc', 'N/A')
+                            rep = ioc_info.get('reputation', {})
+                            vt_malicious = rep.get('virustotal', {}).get('data', {}).get('attributes', {}).get('stats', {}).get('malicious', 0)
+                            uh_status = rep.get('urlhaus', {}).get('url_status', 'N/A')
+                            iocs_list.append(f"- {defang_ioc(ioc)} (VT: {vt_malicious}, URLHaus: {uh_status})")
+                        iocs_str = "\n".join(iocs_list)
 
                         ws_repo.write(f'A{row_num}', res.get('url'), cell_format)
                         ws_repo.write(f'B{row_num}', f"{score}/100", score_format)
@@ -70,6 +78,7 @@ class ReportGenerator:
                         ws_repo.write(f'D{row_num}', secrets_str if secrets_str else "Nenhum", wrap_format)
                         ws_repo.write(f'E{row_num}', "\n".join(res.get('suspicious_files', [])), wrap_format)
                         ws_repo.write(f'F{row_num}', deps_str if deps_str else "Nenhuma", wrap_format)
+                        ws_repo.write(f'G{row_num}', iocs_str if iocs_str else "Nenhum", wrap_format)
 
                 if self.ip_results_dict:
                     ws_ips = workbook.add_worksheet("Relatório de IPs")
@@ -204,6 +213,14 @@ class ReportGenerator:
             malicious_urls_vt = [url for url, res in self.url_results_dict.items() if (res.get('virustotal') or {}).get('data',{}).get('attributes',{}).get('stats',{}).get('malicious',0) > 0]
             malicious_files_vt = [(res.get('filename', f_hash[:15]), f_hash) for f_hash, res in self.file_results_dict.items() if (res.get('virustotal') or {}).get('data',{}).get('attributes',{}).get('last_analysis_stats',{}).get('malicious',0) > 0]
             
+            malicious_iocs_from_repos = []
+            for repo in self.repo_results_dict:
+                for ioc_info in repo.get('extracted_iocs', []):
+                    rep = ioc_info.get('reputation', {})
+                    vt_malicious = rep.get('virustotal', {}).get('data', {}).get('attributes', {}).get('stats', {}).get('malicious', 0)
+                    if vt_malicious > 0:
+                        malicious_iocs_from_repos.append(ioc_info.get('ioc'))
+
             summary_data = [['Item', 'Resultado']]
             if self.repo_results_dict:
                 summary_data.extend([['Total de Repositórios analisados', str(len(self.repo_results_dict))]])
@@ -215,6 +232,8 @@ class ReportGenerator:
                         ['Repositório com Maior Risco', wrapped_url],
                         ['Maior Risco Encontrado', f"{highest_risk_repo.get('risk_score', 0)}/100"]
                     ])
+                if malicious_iocs_from_repos:
+                    summary_data.append(['IOCs maliciosos (de Repos)', str(len(malicious_iocs_from_repos))])
 
             if self.ip_results_dict: summary_data.extend([['Total de IPs analisados', str(len(self.ip_results_dict))], ['IPs maliciosos (VT)', str(len(malicious_ips_vt))]])
             if self.url_results_dict: summary_data.extend([['Total de URLs analisadas', str(len(self.url_results_dict))], ['URLs maliciosas (VT)', str(len(malicious_urls_vt))]])
@@ -223,8 +242,12 @@ class ReportGenerator:
             summary_table = Table(summary_data, colWidths=[2.5*inch, 4.5*inch]); summary_table.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,0), navy), ('TEXTCOLOR',(0,0),(-1,0), white), ('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('FONTNAME', (0,0), (-1,0), font_name_bold), ('BOTTOMPADDING', (0,0), (-1,0), 12), ('BACKGROUND', (0,1), (-1,-1), (0.9, 0.9, 0.9)), ('GRID', (0,0), (-1,-1), 1, (0.7,0.7,0.7))]))
             story.append(summary_table); story.append(Spacer(1, 0.2*inch))
 
-            if malicious_ips_vt or malicious_urls_vt or malicious_files_vt:
+            if malicious_ips_vt or malicious_urls_vt or malicious_files_vt or malicious_iocs_from_repos:
                 story.append(Paragraph("<b>Indicadores Maliciosos Encontrados (Destaque)</b>", styles['h2'])); story.append(Spacer(1, 0.1*inch))
+                if malicious_iocs_from_repos:
+                    story.append(Paragraph("<b>IOCs Maliciosos (de Repositórios):</b>", styles['h3']))
+                    for url in set(malicious_iocs_from_repos): story.append(Paragraph(f'<a href="https://www.virustotal.com/gui/search/{url}" color="blue">{defang_ioc(url)}</a>', styles['Normal']))
+                    story.append(Spacer(1, 0.1*inch))
                 if malicious_ips_vt:
                     story.append(Paragraph("<b>IPs Maliciosos:</b>", styles['h3']))
                     for ip in malicious_ips_vt: story.append(Paragraph(f'<a href="https://www.virustotal.com/gui/ip-address/{ip}" color="blue">{defang_ioc(ip)}</a>', styles['Normal']))
@@ -276,53 +299,32 @@ class ReportGenerator:
             story.append(Paragraph("<b>Relatório Detalhado de Indicadores Analisados</b>", styles['h2']))
             story.append(Spacer(1, 0.1*inch))
             
-            # Style for the header-row based tables (IPs, URLs, Files)
-            other_tables_style = TableStyle([
-                ('BACKGROUND', (0,0), (-1,0), navy), 
-                ('TEXTCOLOR',(0,0),(-1,0), white), 
-                ('ALIGN', (0,0), (-1,-1), 'LEFT'), 
-                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), 
-                ('FONTNAME', (0,0), (-1,0), font_name_bold), 
-                ('FONTSIZE', (0,0), (-1,0), 9), 
-                ('BOTTOMPADDING', (0,0), (-1,0), 10), 
-                ('BACKGROUND', (0,1), (-1,-1), whitesmoke), 
-                ('GRID', (0,0), (-1,-1), 1, lightgrey), 
-                ('ROWBACKGROUNDS', (0,1), (-1,-1), [whitesmoke, (0.9,0.9,0.9)])
-            ])
+            other_tables_style = TableStyle([('BACKGROUND', (0,0), (-1,0), navy), ('TEXTCOLOR',(0,0),(-1,0), white), ('ALIGN', (0,0), (-1,-1), 'LEFT'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('FONTNAME', (0,0), (-1,0), font_name_bold), ('FONTSIZE', (0,0), (-1,0), 9), ('BOTTOMPADDING', (0,0), (-1,0), 10), ('BACKGROUND', (0,1), (-1,-1), whitesmoke), ('GRID', (0,0), (-1,-1), 1, lightgrey), ('ROWBACKGROUNDS', (0,1), (-1,-1), [whitesmoke, (0.9,0.9,0.9)])])
 
             if self.repo_results_dict:
                 story.append(Paragraph("<b>Repositórios Analisados</b>", styles['h3']))
-
                 for res in self.repo_results_dict:
                     secrets_str = "<br/>".join([f"• {s['type']} em {s['file']}" for s in res.get('exposed_secrets', [])]) or "Nenhum"
                     files_str = "<br/>".join([f"• {f}" for f in res.get('suspicious_files', [])]) or "Nenhum"
-                    
+                    iocs_list = []
+                    for ioc_info in res.get('extracted_iocs', []):
+                        ioc = ioc_info.get('ioc', 'N/A')
+                        rep = ioc_info.get('reputation', {})
+                        vt_malicious = rep.get('virustotal', {}).get('data', {}).get('attributes', {}).get('stats', {}).get('malicious', 0)
+                        iocs_list.append(f"• {defang_ioc(ioc)} (VT: {vt_malicious})")
+                    iocs_str = "<br/>".join(iocs_list) or "Nenhum"
+
                     repo_table_data = [
                         [Paragraph('<b>URL</b>', styles['TableCellBold']), Paragraph(f'<a href="{res.get("url")}" color="blue">{res.get("url")}</a>', styles['TableCell'])],
                         [Paragraph('<b>Risco Estático</b>', styles['TableCellBold']), Paragraph(f'{res.get("risk_score", 0)}/100', styles['TableCell'])],
                         [Paragraph('<b>Arquivos Suspeitos</b>', styles['TableCellBold']), Paragraph(files_str, styles['TableCell'])],
-                        [Paragraph('<b>Segredos Expostos</b>', styles['TableCellBold']), Paragraph(secrets_str, styles['TableCell'])]
+                        [Paragraph('<b>Segredos Expostos</b>', styles['TableCellBold']), Paragraph(secrets_str, styles['TableCell'])],
+                        [Paragraph('<b>IOCs Extraídos</b>', styles['TableCellBold']), Paragraph(iocs_str, styles['TableCell'])]
                     ]
                     
                     repo_table = Table(repo_table_data, colWidths=[1.5*inch, 5.5*inch])
-                    
-                    # New style specifically for the column-based repository table
-                    repo_table_style = TableStyle([
-                        # First column (the "Titles")
-                        ('BACKGROUND', (0,0), (0,-1), navy),
-                        ('TEXTCOLOR', (0,0), (0,-1), white), # This is respected by Paragraphs without their own color
-                        
-                        # Second column (the "Values")
-                        ('BACKGROUND', (1,0), (1,-1), whitesmoke),
-                        ('TEXTCOLOR', (1,0), (1,-1), black), # Values are black
-                        
-                        # General table styling
-                        ('GRID', (0,0), (-1,-1), 1, lightgrey),
-                        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-                        ('FONTNAME', (0,0), (0,-1), font_name_bold), # Titles are bold
-                    ])
+                    repo_table_style = TableStyle([('BACKGROUND', (0,0), (0,-1), navy),('TEXTCOLOR', (0,0), (0,-1), white), ('BACKGROUND', (1,0), (1,-1), whitesmoke),('TEXTCOLOR', (1,0), (1,-1), black), ('GRID', (0,0), (-1,-1), 1, lightgrey),('VALIGN', (0,0), (-1,-1), 'MIDDLE'),('FONTNAME', (0,0), (0,-1), font_name_bold)])
                     repo_table.setStyle(repo_table_style)
-                    
                     story.append(repo_table)
                     story.append(Spacer(1, 0.2*inch))
 
