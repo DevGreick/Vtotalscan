@@ -175,7 +175,7 @@ https://github.com/DevGreick/threatspy-test-env
 - Gestão segura de chaves por `keyring`
 
 <a id="responsavel"></a>
-## ⚖️ Uso Responsável e Limites
+## ⚖️ Use com responsabilidade
 
 - Use apenas com autorização e para fins educacionais e de pesquisa
 - Siga os termos de uso das APIs
