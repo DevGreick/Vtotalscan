@@ -220,7 +220,7 @@ Esta é uma ferramenta poderosa de verificação de segurança, para funcionar, 
 - **Cuidado com dados sensíveis:** Se você analisar repositórios privados ou dados confidenciais (como URLs de infraestrutura interna da sua empresa), essas informações podem ser enviadas às APIs mencionadas
 - **Endpoint de IA:** A função de resumo por IA envia um dossiê da análise para o endpoint configurado. O padrão é Ollama local (`http://localhost:11434`). Se você usar um endpoint remoto, os dados sairão da sua máquina
 
-Use por sua conta e risco. O mantenedor não se responsabiliza por vazamento de dados decorrente do uso desta ferramenta. Utilize somente com autorização e para fins educacionais e de pesquisa, seguindo os termos de uso das APIs.
+Use por sua conta e risco. O mantenedor não se responsabiliza por vazamento de dados decorrente do uso desta ferramenta.
 
 <a id="tech"></a>
 
