@@ -53,7 +53,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 Recentemente, um golpe de recrutamento no LinkedIn usou repositórios GitHub maliciosos como testes técnicos para DEVs. O objetivo era infectar a máquina do candidato para roubar credenciais.
 
-Com o ThreatSpy, você não precisa clonar ou executar nada. Basta usar a aba **"Análise de Repositório"**, colar a URL suspeita e a ferramenta irá verificar:
+Com o ThreatSpy, você não precisa clonar ou executar nada. Basta usar a aba **Análise de Repositório**, colar a URL suspeita e a ferramenta irá verificar:
 
 - **Segredos Expostos**: chaves de API, tokens e senhas em arquivos como `.env`.
 - **Arquivos de Configuração Sensíveis**: `credentials.json`, `database.yml`, etc.
