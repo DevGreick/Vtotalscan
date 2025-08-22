@@ -52,19 +52,19 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 <a id="caso-real--o-golpe-do-repositório-falso"></a>
 
-## 🚨 Caso real: golpe do repositório falso
+## 🚨 Caso Real – O Golpe do Repositório Falso
 
-Recentemente, um golpe de recrutamento no LinkedIn usou repositórios GitHub maliciosos como testes técnicos para DEVs. O objetivo era fazer o candidato clonar o projeto e rodar um script de instalação malicioso (`npm install`) para infectar sua máquina e roubar credenciais.
+Golpes de recrutamento vêm usando repositórios maliciosos como “teste técnico” para devs. O roteiro é sempre parecido, o candidato clona o repo e roda `npm install`, muitas vezes com instrução de `npm install --force`. Dentro do projeto aparece um `.env` com string em Base64 que leva a um domínio suspeito e scripts de instalação que podem abrir brechas locais.
 
-O ThreatSpy foi aprimorado para detectar exatamente este tipo de ameaça sem precisar clonar ou executar nada. Basta usar a aba **Análise de Repositório** e colar a URL suspeita. A ferramenta irá verificar:
+Como o ThreatSpy ajuda sem clonar nem executar
+- detecta `.env` e procura chaves, tokens e segredos
+- decodifica Base64 e extrai IOCs para checagem de reputação
+- inspeciona `package.json` e alerta para `preinstall` e `postinstall`
+- lê `README.md` e marca comandos perigosos como `npm install --force` e `curl ... | sh`
+- gera relatório com score de risco e links defanged
 
-- **Segredos Expostos**: análise de arquivos como `.env` em busca de chaves de API, tokens e senhas.
-- **Arquivos de Configuração Sensíveis**: verificação de arquivos conhecidos por conter dados sensíveis, como `credentials.json` e `database.yml`.
-- **IOCs Ocultos**: decodificação de strings Base64 para encontrar URLs e domínios maliciosos escondidos.
-- **Comandos Perigosos**: alerta sobre comandos suspeitos em arquivos como `README.md` (ex: `npm install --force` ou `curl ... | sh`).
-- **Scripts de Instalação Maliciosos**: auditoria do `package.json` em busca de scripts perigosos nas fases de `preinstall` ou `postinstall`.
-
-Ao final, você recebe um relatório completo do risco antes de expor seu ambiente.
+Ação imediata
+- cole a URL do repo na aba **Análise de Repositório** e veja o risco antes de rodar qualquer comando
 
 <a id="funcionalidades-principais"></a>
 
@@ -86,7 +86,8 @@ Ao final, você recebe um relatório completo do risco antes de expor seu ambien
   - logs em pastas de dados do usuário, garantindo execução em qualquer diretório
 
 <a id="tecnologias-utilizadas"></a>
-<h2>🛠️ Tecnologias Utilizadas</h2>
+
+## 🛠️ Tecnologias Utilizadas
 
 <div align="center">
 
@@ -110,7 +111,6 @@ Ao final, você recebe um relatório completo do risco antes de expor seu ambien
 
 </div>
 
-<a id="screenshot-da-ferramenta"></a>
 <a id="screenshot-da-ferramenta"></a>
 
 ## 📸 Screenshot da Ferramenta
@@ -191,23 +191,21 @@ python main_gui.py
 
 <a id="configuracao-essencial"></a>
 
-## ⚙️ Configuração Essencial
+## ⚙️ Configuração
 
-Antes do primeiro uso, você precisa configurar suas chaves de API.
+Para usar o ThreatSpy, você precisará configurar algumas chaves de API. A única chave **obrigatória** é a do VirusTotal. As outras são **opcionais**, mas enriquecem muito os relatórios.
 
-1. Inicie a aplicação.
-2. Na tela principal, clique em **Configurações**.
-3. Insira suas chaves de API. As chaves são salvas de forma segura no keyring do seu sistema operacional.
+Você pode adicionar todas as chaves facilmente clicando no botão **Configurações** dentro do aplicativo.
 
-**Chave Principal (Essencial):**
-- VirusTotal: essencial para a análise de IPs, URLs e arquivos.
-
-**Chaves Opcionais (Recomendadas):**
-- GitHub/GitLab: altamente recomendadas para a análise de repositórios, evitando bloqueios de API.
-- AbuseIPDB, Shodan, etc.: enriquecem os relatórios com dados adicionais.
-
-**IA Local (Opcional):**
-- Ollama: verifique se o serviço está rodando para usar a funcionalidade de resumo por IA. O endpoint padrão já vem configurado.
+| Serviço         | Necessidade  | O que habilita?                                                  |
+|-----------------|--------------|------------------------------------------------------------------|
+| VirusTotal      | `Obrigatória`| Análise de reputação de IPs, URLs e Arquivos.                   |
+| GitHub / GitLab | `Recomendada`| Análise de Repositórios (evita bloqueios de API).               |
+| AbuseIPDB       | `Opcional`   | Adiciona "Score de Abuso" para IPs.                             |
+| Shodan          | `Opcional`   | Adiciona informações de portas e serviços para IPs.             |
+| URLHaus         | `Opcional`   | Verifica se URLs estão distribuindo malware ativamente.         |
+| MalwareBazaar   | `Opcional`   | Identifica o nome da ameaça (malware) de arquivos.              |
+| Ollama (IA)     | `Opcional`   | Resumos automáticos gerados por IA local.                       |
 
 <a id="como-usar"></a>
 
