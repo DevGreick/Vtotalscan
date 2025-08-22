@@ -128,17 +128,12 @@ python main_gui.py
 <a id="config"></a>
 ## ⚙️ Configuração Essencial
 
-Apenas a chave do **VirusTotal** é obrigatória. As demais enriquecem os relatórios.
+Apenas a chave do **VirusTotal** é obrigatória, mas as opcionais enriquecem enormemente a análise, adicionando mais contexto e fontes de dados aos seus relatórios.
 
 | Serviço        | Necessidade | O que habilita?                                   |
 | :------------- | :---------- | :------------------------------------------------ |
 | VirusTotal     | Obrigatória | Análise de reputação de IPs, URLs e arquivos.     |
 | GitHub/GitLab  | Recomendada | Análise de repositórios, evita bloqueios de API.  |
-
-> As chaves abaixo não são obrigatórias, mas enriquecem enormemente a análise, adicionando mais contexto e fontes de dados aos seus relatórios.
-
-| Serviço        | Necessidade | O que habilita?                                   |
-| :------------- | :---------- | :------------------------------------------------ |
 | AbuseIPDB      | Opcional    | Score de abuso de IPs.                            |
 | Shodan         | Opcional    | Portas e serviços para IPs.                       |
 | URLHaus        | Opcional    | Verifica distribuição ativa de malware em URLs.   |
