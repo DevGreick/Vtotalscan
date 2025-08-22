@@ -181,7 +181,7 @@ https://github.com/DevGreick/threatspy-test-env
 - Siga os termos de uso das APIs
 - Não analise dados de terceiros sem permissão explícita
 
-  ## ⚠️ Aviso de Segurança e Privacidade
+## ⚠️ Aviso de Segurança e Privacidade
 
 Esta ferramenta foi projetada para analistas de segurança e se comunica com múltiplos serviços de terceiros para enriquecer os dados. Esteja ciente de que:
 
