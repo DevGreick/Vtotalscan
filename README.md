@@ -64,10 +64,6 @@ Com o ThreatSpy, você não precisa clonar ou executar nada. Basta usar a aba "A
 - lê `README.md` e marca comandos perigosos como `npm install --force` e `curl ... | sh`
 - gera relatório com score de risco e links defanged
 
-Ação imediata:
-
-- cole a URL do repo na aba **Análise de Repositório** e veja o risco antes de rodar qualquer comando
-
 <a id="funcionalidades-principais"></a>
 
 ## ✨ Funcionalidades Principais
