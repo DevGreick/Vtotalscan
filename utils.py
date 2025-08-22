@@ -26,7 +26,7 @@ def is_file_writable(filepath):
 def parse_repo_urls(text):
     """
     Analisa um bloco de texto, valida cada linha como uma URL de repositório (completa ou curta)
-    e retorna listas de URLs válidas, linhas inválidas e linhas duplicadas.
+    e retorna listas de URLs válidas (preservando o caso do caminho), linhas inválidas e linhas duplicadas.
     """
     seen_urls = set()
     valid_urls = []
@@ -34,7 +34,7 @@ def parse_repo_urls(text):
     duplicate_lines = []
     
     full_url_pattern = re.compile(
-        r'^(?:https?:\/\/)?(?:www\.)?(github\.com|gitlab\.com)\/([\w.-]+\/[\w.-]+(?:[\/\w.-])*)'
+        r'^(?:https?:\/\/)?(?:www\.)?(github\.com|gitlab\.com)\/([\w.-]+\/[\w.-]+(?:[\/\w.-])*)', re.IGNORECASE
     )
     
     shorthand_pattern = re.compile(r'^([\w.-]+\/[\w.-]+)')
@@ -48,25 +48,31 @@ def parse_repo_urls(text):
         shorthand_match = shorthand_pattern.match(line)
 
         if full_match:
-            # Limpa a URL removendo .git no final se existir
+            domain = full_match.group(1)
             repo_path = full_match.group(2).removesuffix('.git')
-            normalized_url = f"https://{full_match.group(1)}/{repo_path}".lower()
-            if normalized_url in seen_urls:
+            
+            original_case_url = f"https://{domain}/{repo_path}"
+            lower_case_check = original_case_url.lower()
+
+            if lower_case_check in seen_urls:
                 duplicate_lines.append(line)
             else:
-                valid_urls.append(normalized_url)
-                seen_urls.add(normalized_url)
+                valid_urls.append(original_case_url)
+                seen_urls.add(lower_case_check)
         elif shorthand_match:
-            normalized_url = f"https://github.com/{shorthand_match.group(1)}".lower()
-            if normalized_url in seen_urls:
+            repo_path = shorthand_match.group(1)
+            original_case_url = f"https://github.com/{repo_path}"
+            lower_case_check = original_case_url.lower()
+
+            if lower_case_check in seen_urls:
                 duplicate_lines.append(line)
             else:
-                valid_urls.append(normalized_url)
-                seen_urls.add(normalized_url)
+                valid_urls.append(original_case_url)
+                seen_urls.add(lower_case_check)
         else:
             invalid_lines.append(line)
             
-    return sorted(valid_urls), invalid_lines, list(set(duplicate_lines))
+    return sorted(valid_urls), invalid_lines, sorted(list(set(duplicate_lines)))
 
 def parse_targets(text):
     valid_ips = set()

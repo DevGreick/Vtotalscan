@@ -6,6 +6,7 @@ import keyring
 import logging
 import base64
 from urllib.parse import urlparse, quote_plus
+import re
 
 class ApiClient:
     def __init__(self):
@@ -19,7 +20,7 @@ class ApiClient:
         self.ai_endpoint = self._read_config('AI', 'endpoint')
         
         self.session = requests.Session()
-        self.session.headers.update({ "User-Agent": "ThreatSpy/1.2" })
+        self.session.headers.update({ "User-Agent": "ThreatSpy/1.3" })
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def _read_config(self, section, key):
@@ -37,8 +38,11 @@ class ApiClient:
         while retries < max_retries:
             try:
                 response = self.session.request(method, url, timeout=20, **kwargs)
-                response.raise_for_status() 
-                return response.json()
+                if response.status_code == 404:
+                    logging.info(f"Recurso não encontrado na API (404): {url}")
+                    return {"error": "Not Found"}
+                response.raise_for_status()
+                return response.json() if response.content else {}
             except requests.exceptions.HTTPError as e:
                 if 400 <= e.response.status_code < 500:
                     if e.response.status_code in [429, 403]: 
@@ -49,24 +53,29 @@ class ApiClient:
                             logging.error(f"Máximo de retentativas para limite de API atingido em {url}.")
                             return {"error": "Rate Limit"}
                         continue
-                    if e.response.status_code == 404:
-                        logging.info(f"Recurso não encontrado na API (404): {url}")
-                        return {"error": "Not Found"}
-                    
                     logging.error(f"Erro de Cliente HTTP (4xx) em '{url}': {e}")
                     return None 
-                
                 logging.warning(f"Erro de Servidor HTTP (5xx) em '{url}': {e}. Tentando novamente...")
                 time.sleep((backoff_factor ** retries))
                 retries += 1
-
             except requests.exceptions.RequestException as e:
                 logging.warning(f"Erro de requisição em '{url}': {e}. Tentando novamente...")
                 time.sleep((backoff_factor ** retries))
                 retries += 1
-        
         logging.error(f"Máximo de tentativas atingido para a URL: {url}")
         return None
+    
+    def check_package_vulnerability(self, package_name, ecosystem="npm"):
+        url = "https://api.osv.dev/v1/query"
+        payload = {"package": {"name": package_name, "ecosystem": ecosystem}}
+        try:
+            response = self.session.post(url, json=payload, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("vulns")
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Erro ao consultar OSV para o pacote {package_name}: {e}")
+            return None
 
     def _get_platform_from_url(self, repo_url):
         hostname = urlparse(repo_url).hostname
@@ -82,72 +91,109 @@ class ApiClient:
         headers = {}
         if self.gitlab_api_key:
             headers["PRIVATE-TOKEN"] = self.gitlab_api_key
-            
         project_data = self._make_request('GET', url, headers=headers)
         if project_data and isinstance(project_data, dict) and 'id' in project_data:
             return project_data['id']
         logging.error(f"Não foi possível encontrar o ID do projeto GitLab para: {project_path}")
         return None
 
+    def _fetch_all_files_recursively(self, url, headers):
+        all_files = []
+        contents = self._make_request('GET', url, headers=headers)
+        if not isinstance(contents, list):
+            logging.error(f"Resposta inesperada da API para {url}: {contents}")
+            return []
+        for item in contents:
+            if item.get('type') == 'file':
+                all_files.append({
+                    'name': item.get('name'), 
+                    'path': item.get('path'), 
+                    'type': 'file', 
+                    'platform': 'github', 
+                    'item_url': item.get('url')
+                })
+            elif item.get('type') == 'dir':
+                all_files.extend(self._fetch_all_files_recursively(item.get('url'), headers))
+        return all_files
+        
     def list_repository_files(self, repo_url):
         platform = self._get_platform_from_url(repo_url)
         parsed_url = urlparse(repo_url)
-        path_parts = parsed_url.path.strip('/').split('/')
-        
+        path = parsed_url.path.strip('/')
         if platform == 'github':
-            owner, repo = path_parts[0], path_parts[1]
-            api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/"
+            match = re.match(r'^([^/]+)/([^/]+)(?:/tree/[^/]+/(.*))?$', path)
+            if not match:
+                return {"error": "Formato de URL do GitHub inválido"}
+            owner, repo, subpath = match.groups()
+            subpath = subpath if subpath else ''
+            api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{subpath}"
             headers = {"Accept": "application/vnd.github.v3+json"}
             if self.github_api_key:
                 headers["Authorization"] = f"token {self.github_api_key}"
-            
-            files = self._make_request('GET', api_url, headers=headers)
-            if isinstance(files, list):
-                return [{'name': f.get('name'), 'path': f.get('path'), 'type': f.get('type'), 'platform': 'github', 'item_url': f.get('url')} for f in files]
-            return files
-
+            return self._fetch_all_files_recursively(api_url, headers)
         elif platform == 'gitlab':
-            project_path = "/".join(path_parts)
+            project_path_parts = path.split('/-/')
+            project_path = project_path_parts[0]
+            subpath = ''
+            if len(project_path_parts) > 1 and 'tree' in project_path_parts[1]:
+                subpath = '/'.join(project_path_parts[1].split('/')[2:])
             project_id = self._get_gitlab_project_id(project_path, parsed_url.hostname)
             if not project_id:
                 return {"error": "GitLab Project Not Found"}
-
             api_url = f"https://{parsed_url.hostname}/api/v4/projects/{project_id}/repository/tree"
+            params = {'recursive': True, 'per_page': 100}
+            if subpath:
+                params['path'] = subpath
             headers = {}
             if self.gitlab_api_key:
                 headers["PRIVATE-TOKEN"] = self.gitlab_api_key
-
-            files = self._make_request('GET', api_url, headers=headers)
-            if isinstance(files, list):
-                return [{'name': f.get('name'), 'path': f.get('path'), 'type': f.get('type'), 'platform': 'gitlab', 'project_id': project_id} for f in files]
-            return files
-        
-        return {"error": "Platform not supported"}
+            all_files = []
+            page = 1
+            while True:
+                params['page'] = page
+                files = self._make_request('GET', api_url, headers=headers, params=params)
+                if not isinstance(files, list) or not files:
+                    break
+                for f in files:
+                    if f.get('type') == 'blob':
+                        all_files.append({
+                            'name': f.get('name'), 
+                            'path': f.get('path'), 
+                            'type': 'file', 
+                            'platform': 'gitlab', 
+                            'project_id': project_id
+                        })
+                page += 1
+            return all_files
+        return {"error": "Plataforma não suportada"}
 
     def get_repository_file_content(self, file_info):
         platform = file_info.get('platform')
-
         if platform == 'github':
-            headers = {"Accept": "application/vnd.github.v3+json"}
+            headers = {"Accept": "application/vnd.github.v3.raw"}
             if self.github_api_key:
                 headers["Authorization"] = f"token {self.github_api_key}"
-            
-            response = self._make_request('GET', file_info['item_url'], headers=headers)
-            if response and 'content' in response:
-                return base64.b64decode(response['content']).decode('utf-8', errors='ignore')
-
+            try:
+                response = self.session.get(file_info['item_url'], headers=headers, timeout=20)
+                response.raise_for_status()
+                return response.text
+            except requests.exceptions.RequestException as e:
+                logging.error(f"Não foi possível obter o conteúdo do arquivo {file_info.get('path')}: {e}")
+                return None
         elif platform == 'gitlab':
             project_id = file_info['project_id']
             file_path_encoded = quote_plus(file_info['path'])
-            api_url = f"https://gitlab.com/api/v4/projects/{project_id}/repository/files/{file_path_encoded}?ref=main"
+            api_url = f"https://gitlab.com/api/v4/projects/{project_id}/repository/files/{file_path_encoded}/raw?ref=main"
             headers = {}
             if self.gitlab_api_key:
                 headers["PRIVATE-TOKEN"] = self.gitlab_api_key
-
-            response = self._make_request('GET', api_url, headers=headers)
-            if response and 'content' in response:
-                return base64.b64decode(response['content']).decode('utf-8', errors='ignore')
-
+            try:
+                response = self.session.get(api_url, headers=headers, timeout=20)
+                response.raise_for_status()
+                return response.text
+            except requests.exceptions.RequestException as e:
+                logging.error(f"Não foi possível obter o conteúdo do arquivo {file_info.get('path')}: {e}")
+                return None
         return None
 
     def check_ip(self, ip):
@@ -161,14 +207,11 @@ class ApiClient:
         post_url = "https://www.virustotal.com/api/v3/urls"
         payload = {"url": url_to_check}
         headers = {"x-apikey": self.vt_api_key}
-        
         post_response = self._make_request('POST', post_url, headers=headers, data=payload)
         if not post_response or 'data' not in post_response:
             return None
-        
         analysis_id = post_response['data']['id']
         analysis_url = f"https://www.virustotal.com/api/v3/analyses/{analysis_id}"
-        
         for _ in range(10): 
             analysis_report = self._make_request('GET', analysis_url, headers=headers)
             if analysis_report and analysis_report.get('data', {}).get('attributes', {}).get('status') == 'completed':
@@ -185,7 +228,7 @@ class ApiClient:
     def check_hash_malwarebazaar(self, file_hash):
         if not self.mb_api_key: return None
         url = "https://mb-api.abuse.ch/api/v1/"
-        headers = { 'Auth-Key': self.mb_api_key }
+        headers = { 'API-KEY': self.mb_api_key }
         data = { 'query': 'get_info', 'hash': file_hash }
         return self._make_request('POST', url, headers=headers, data=data)
 
