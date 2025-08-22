@@ -1,8 +1,18 @@
+<div align="center">
+
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
+![GUI](https://img.shields.io/badge/GUI-PySide6-purple.svg)
+![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
+
+</div>
 <h1 align="center">🔎 ThreatSpy</h1>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/spy2-1.png" alt="Logo do ThreatSpy" width="150">
 </p>
+
 
 Uma ferramenta de análise e inteligência de ameaças (Threat Intelligence) que automatiza a consulta de IPs, URLs e arquivos em múltiplas fontes, gera relatórios profissionais e cria resumos com IA local.
 
@@ -76,19 +86,31 @@ Ao final, você recebe um relatório completo do risco antes de expor seu ambien
   - logs em pastas de dados do usuário, garantindo execução em qualquer diretório
 
 <a id="tecnologias-utilizadas"></a>
+<h2>🛠️ Tecnologias Utilizadas</h2>
 
-## 🛠️ Tecnologias Utilizadas
+<div align="center">
 
-| Tecnologia              | Propósito                                         |
-|-------------------------|---------------------------------------------------|
-| Python                  | Linguagem principal do projeto                    |
-| PySide6 (Qt for Python) | Interface gráfica multiplataforma                 |
-| Ollama                  | Execução de modelos de IA locais para resumos     |
-| Requests                | Comunicação com APIs de Threat Intelligence       |
-| Keyring                 | Armazenamento seguro das chaves de API            |
-| XlsxWriter / ReportLab  | Geração de relatórios em Excel e PDF              |
-| PyInstaller             | Empacotamento da aplicação em executáveis         |
+<table>
+  <thead>
+    <tr>
+      <th>Tecnologia</th>
+      <th>Propósito</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Python</td><td>Linguagem principal do projeto</td></tr>
+    <tr><td>PySide6 (Qt for Python)</td><td>Interface gráfica multiplataforma</td></tr>
+    <tr><td>Ollama</td><td>Execução de modelos de IA locais para resumos</td></tr>
+    <tr><td>Requests</td><td>Comunicação com APIs de Threat Intelligence</td></tr>
+    <tr><td>Keyring</td><td>Armazenamento seguro das chaves de API</td></tr>
+    <tr><td>XlsxWriter / ReportLab</td><td>Geração de relatórios em Excel e PDF</td></tr>
+    <tr><td>PyInstaller</td><td>Empacotamento da aplicação em executáveis</td></tr>
+  </tbody>
+</table>
 
+</div>
+
+<a id="screenshot-da-ferramenta"></a>
 <a id="screenshot-da-ferramenta"></a>
 
 ## 📸 Screenshot da Ferramenta
