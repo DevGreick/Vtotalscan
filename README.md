@@ -10,179 +10,200 @@
 <br>
 
 <div align="center">
-  <!-- Badges -->
-  <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version">
-  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
-  <img src="https://img.shields.io/badge/status-active-success.svg" alt="Project Status">
-  <img src="https://img.shields.io/badge/GUI-PySide6-purple.svg" alt="GUI Framework">
-  <img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg" alt="Contributions Welcome">
+  ⭐ Dê uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatSpy/releases"><strong>Baixar a Última Versão »</strong></a>
 </div>
 
 <br>
 
 <div align="center">
-  <a href="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ThreatsSy.png">
-    <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ThreatsSy.png" alt="Screenshot da interface do ThreatSpy" width="700"/>
-  </a>
+  <!-- Badges Clicáveis -->
+  <a href="https://www.python.org/downloads/release/python-380/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
+  <a href="https://github.com/DevGreick/ThreatSpy/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
+  <img src="https://img.shields.io/badge/status-active-success.svg" alt="Project Status">
+  <a href="https://doc.qt.io/qtforpython/"><img src="https://img.shields.io/badge/GUI-PySide6-purple.svg" alt="GUI Framework"></a>
+  <a href="#contribuicao"><img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg" alt="Contributions Welcome"></a>
 </div>
 
+<br>
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ThreatsSy.png" alt="Screenshot da interface do ThreatSpy" width="700"/>
+</div>
+
+---
 > [!TIP]
 > Abra o Sumário abaixo para navegar rápido.
-
 <details>
 <summary><strong>Sumário</strong> <sub>(clique para expandir)</sub></summary>
 <br/>
 
-- [Sobre o Projeto](#sobre)
-- [Comece a Usar em 30 Segundos](#comece)
+- [Comece a Usar em 30 Segundos](#start)
 - [Instalação](#instalacao)
-  - [Windows](#windows)
-  - [macOS](#macos)
-  - [Linux](#linux)
-  - [A partir do Código-Fonte](#codigo-fonte)
-- [Configuração Essencial](#configuracao)
-- [Como Usar](#como-usar)
-- [Funcionalidades Principais](#funcionalidades)
-- [Tecnologias Utilizadas](#tecnologias)
+- [Configuração Essencial](#config)
+- [Como Usar (Exemplos Práticos)](#uso)
+- [Funcionalidades Principais](#features)
+- [Uso Responsável e Limites](#responsavel)
+- [Tecnologias Utilizadas](#tech)
 - [Contribuição](#contribuicao)
 - [Apoie o Projeto](#apoie)
 - [Licença](#licenca)
 
 </details>
 
-<a id="sobre"></a>
-## Sobre o Projeto
+---
 
-O projeto começou como um script simples para um colega e evoluiu para esta suíte de análise completa. A ferramenta automatiza consultas a múltiplas fontes (VirusTotal, AbuseIPDB, Shodan, etc.), gera relatórios detalhados em Excel e PDF, e utiliza um modelo de IA local (via Ollama) para criar resumos executivos das análises.
+<a id="start"></a>
+### ⚡ Comece a Usar em 30 Segundos
 
-<a id="comece"></a>
-## Comece a Usar em 30 Segundos
+Comece baixando o pacote portátil para o seu sistema.
 
-A maneira mais rápida de começar é baixando a versão mais recente para o seu sistema operacional.
+1. **<a href="https://github.com/DevGreick/ThreatSpy/releases">Baixe o arquivo `.zip` na página de Releases</a>**.
+2. Descompacte em uma pasta de sua preferência e execute o arquivo `ThreatSpy`.
+3. Na primeira execução, abra **Configurações** e adicione sua chave de API do **VirusTotal**. É a única obrigatória.
 
-1. Baixe o executável na página de **[Releases](https://github.com/DevGreick/ThreatSpy/releases)**.
-2. Descompacte e execute o arquivo.
-3. Na primeira vez, vá em **Configurações** e adicione sua chave de API do **VirusTotal** (é a única obrigatória).
+---
 
 <a id="instalacao"></a>
-## Instalação
+### 📦 Instalação
 
-<a id="windows"></a>
-### Windows
+#### Windows
+1. Acesse a página de **Releases**.
+2. Baixe o arquivo `ThreatSpy-Windows.zip`.
+3. Descompacte o arquivo e execute `ThreatSpy.exe`.
 
-1. Acesse a página de Releases.
-2. Baixe o arquivo `.zip` da versão mais recente para Windows.
-3. Descompacte o arquivo em uma pasta de sua preferência.
-4. Execute `ThreatSpy.exe`.
-
-<a id="macos"></a>
-### macOS
-
-1. Acesse a página de Releases.
-2. Baixe o arquivo `.zip` da versão para macOS.
+#### macOS
+1. Acesse a página de **Releases**.
+2. Baixe o arquivo `ThreatSpy-macOS.zip`.
 3. Descompacte e execute `ThreatSpy.app`.
-4. Nota: o macOS pode exibir um aviso de segurança. Se isso ocorrer, clique com o botão direito, selecione **Abrir** e confirme.
+4. **Nota**: o macOS pode exibir um aviso de segurança. Se ocorrer, clique com o botão direito, selecione **Abrir** e confirme.
 
-<a id="linux"></a>
-### Linux
-
-1. Acesse a página de Releases.
-2. Baixe o arquivo `.zip` da versão para Linux.
-3. Descompacte e torne o binário executável:
-   ```bash
-   chmod +x ./ThreatSpy
-   ```
+#### Linux
+1. Acesse a página de **Releases**.
+2. Baixe o arquivo `ThreatSpy-Linux.zip`.
+3. Descompacte e, no terminal, torne o arquivo executável:
+    ```bash
+    chmod +x ThreatSpy
+    ```
 4. Execute o programa:
-   ```bash
-   ./ThreatSpy
-   ```
+    ```bash
+    ./ThreatSpy
+    ```
 
-<a id="codigo-fonte"></a>
-### A partir do Código-Fonte
+---
 
-Pré-requisitos: Python 3.8+ e Git. Para a função de IA, o **Ollama** deve estar instalado e rodando.
+<a id="config"></a>
+### ⚙️ Configuração Essencial
 
-```bash
-# Clone o repositório
-git clone https://github.com/DevGreick/ThreatSpy.git
-cd ThreatSpy
+Após instalar, configure as chaves de API. **Apenas a chave do VirusTotal é obrigatória.**
 
-# Crie e ative um ambiente virtual
-python -m venv venv
-source venv/bin/activate  # No Windows: venv\Scripts\activate
+| Serviço            | Necessidade   | O que habilita?                                         |
+| :----------------- | :------------ | :------------------------------------------------------ |
+| **VirusTotal**     | Obrigatória   | Análise de reputação de IPs, URLs e arquivos.           |
+| **GitHub/GitLab**  | Recomendada   | Análise de repositórios e prevenção de rate limit.      |
+| **AbuseIPDB**      | Opcional      | Score de abuso e dados de reputação de IPs.             |
+| **Shodan**         | Opcional      | Portas e serviços expostos para IPs.                    |
+| **URLHaus**        | Opcional      | Presença em listas de distribuição ativa de malware.    |
+| **MalwareBazaar**  | Opcional      | Identificação de famílias de malware por hash.          |
+| **Ollama (IA)**    | Opcional      | Geração de resumos locais com IA.                       |
 
-# Instale as dependências
-pip install -r requirements.txt
+#### Onde as chaves são salvas?
 
-# Execute o programa
-python main_gui.py
-```
+O ThreatSpy usa `keyring`, que armazena as chaves no cofre de credenciais nativo do sistema operacional:
 
-<a id="configuracao"></a>
-## Configuração Essencial
+- **Windows**: Gerenciador de Credenciais do Windows  
+- **macOS**: Keychain  
+- **Linux**: Secret Service API / KWallet  
 
-Após instalar, a etapa mais importante é configurar as chaves de API. Clique no botão **Configurações** no canto superior direito.
+---
 
-- **Chave principal (essencial)**: **VirusTotal**. Obrigatória para análise de IPs, URLs e arquivos.
-- **Chaves opcionais (recomendadas)**:
-  - **AbuseIPDB**: score de abuso e localização de IPs.
-  - **Shodan**: portas, serviços e possíveis CVEs.
-  - **URLHaus**: verificação de URLs ativamente maliciosas.
-  - **MalwareBazaar**: identificação de famílias de malware por hash.
-  - **GitHub/GitLab**: análise de repositórios sem bloqueios de API.
-  - **Ollama**: resumos com IA local (endpoint padrão já configurado).
-- As chaves são salvas com **keyring** do sistema.
+<a id="uso"></a>
+### 🛠️ Como Usar (Exemplos Práticos)
 
-<a id="como-usar"></a>
-## Como Usar
+#### Exemplo 1: Analisando IOCs
 
-A ferramenta possui dois fluxos de análise principais.
+1. Abra a aba **Análise de IOCs**.  
+2. Cole alguns indicadores, por exemplo:
+    ```
+    185.172.128.150
+    https://example.com/path
+    8.8.8.8
+    ```
+3. Clique em **Analisar Alvos**. O ThreatSpy consulta as APIs em paralelo e gera um relatório em Excel com os resultados.
 
-| Tipo de Análise        | Como Fazer |
-|------------------------|------------|
-| IPs e URLs             | Na aba **Análise de IOCs**, cole os indicadores na caixa de texto e clique em **Analisar Alvos**. |
-| Arquivos               | Em **Análise de IOCs**, clique em **Verificar Reputação de Arquivos** e selecione um ou mais arquivos. |
-| Repositórios           | Vá para a aba **Análise de Repositório**, cole as URLs do GitHub/GitLab e clique em **Analisar Repositórios**. |
-| Relatórios e Resumos   | Após a análise, use **Resumo Gerado por IA** para exportar texto ou PDF. |
+#### Exemplo 2: Analisando um Repositório
 
-<a id="funcionalidades"></a>
-## Funcionalidades Principais
+1. Abra a aba **Análise de Repositório**.  
+2. Cole a URL do repositório alvo, por exemplo:
+    ```
+    https://github.com/owner/repo
+    ```
+3. Clique em **Analisar Repositórios**. A ferramenta inspeciona segredos expostos, arquivos sensíveis e IOCs em Base64 sem clonar o projeto.
 
-- Análise massivamente paralela de indicadores.
-- Análise remota de repositórios: segredos, arquivos sensíveis, IOCs em Base64 e scripts maliciosos.
-- Interface gráfica moderna em **PySide6** com tema escuro e abas.
-- Relatórios em **Excel** (.xlsx) e **PDF**, com *defang* automático.
-- Resumos com IA local via **Ollama**.
-- Gestão segura de chaves com **keyring** e retentativas para lidar com limites de API.
+---
 
-<a id="tecnologias"></a>
-## Tecnologias Utilizadas
+<a id="features"></a>
+### ✨ Funcionalidades Principais
 
-| Tecnologia              | Propósito                            |
-|-------------------------|--------------------------------------|
-| Python                  | Linguagem principal do projeto       |
-| PySide6 (Qt)            | Interface gráfica multiplataforma    |
-| Ollama                  | Execução de modelos de IA locais     |
-| Requests                | Comunicação com APIs de TI           |
-| Keyring                 | Armazenamento seguro das chaves      |
-| XlsxWriter / ReportLab  | Geração de relatórios em Excel e PDF |
-| PyInstaller             | Empacotamento em executáveis         |
+- **Análise paralela de indicadores** com consultas simultâneas.  
+- **Inspeção remota de repositórios** GitHub e GitLab, incluindo segredos, arquivos sensíveis, IOCs em Base64 e scripts maliciosos.  
+- **Interface gráfica em PySide6** com tema escuro e organização em abas.  
+- **Relatórios em Excel (`.xlsx`) e PDF**, com defang automático.  
+- **Resumos com IA local via Ollama** para texto executivo.  
+- **Armazenamento seguro de chaves** com `keyring` e retentativas para contornar limites de API.
+
+---
+
+<a id="responsavel"></a>
+### ⚖️ Uso Responsável e Limites
+
+- Destinado a fins educacionais e de análise de segurança.  
+- Respeite os Termos de Serviço das APIs utilizadas.  
+- Não analise dados ou sistemas de terceiros sem autorização explícita.
+
+---
+
+<a id="tech"></a>
+### 🛠️ Tecnologias Utilizadas
+
+| Tecnologia              | Propósito                                   |
+| ----------------------- | ------------------------------------------- |
+| **Python**              | Linguagem do projeto                        |
+| **PySide6 (Qt)**        | Interface gráfica multiplataforma           |
+| **Ollama**              | Execução de modelos de IA locais            |
+| **Requests**            | Comunicação com APIs de Threat Intelligence |
+| **Keyring**             | Armazenamento seguro de chaves de API       |
+| **XlsxWriter/ReportLab**| Geração de relatórios em Excel e PDF        |
+| **PyInstaller**         | Empacotamento em executáveis                |
+
+---
 
 <a id="contribuicao"></a>
-## 🤝 Contribuição
+### 🤝 Contribuição
 
-Projeto aberto a contribuições. Encontrou um bug, tem ideia ou quer enviar uma feature? Abra uma **Issue** ou **Pull Request**.
+Contribuições são bem-vindas.
+
+1. Faça um **fork** do projeto.  
+2. Crie uma branch (`git checkout -b feature/nova-feature`).  
+3. Commit das alterações (`git commit -m 'Adiciona nova feature'`).  
+4. Push para a branch (`git push origin feature/nova-feature`).  
+5. Abra um **Pull Request**.
+
+---
 
 <a id="apoie"></a>
-## ☕ Apoie o Projeto
+### ☕ Apoie o Projeto
+
+Se você achou esta ferramenta útil, considere apoiar meu trabalho. Isso ajuda a manter o projeto ativo e a desenvolver novas funcionalidades.
 
 <div align="center">
-  <a href="https://buymeacoffee.com/devgreick" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" width="200">
-  </a>
+<a href="https://buymeacoffee.com/devgreick" target="_blank">
+<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" width="200">
+</a>
 </div>
 
-<a id="licenca"></a>
-## 📜 Licença
+---
 
-Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` para mais informações.
+<a id="licenca"></a>
+### 📜 Licença
+
+Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE`.
