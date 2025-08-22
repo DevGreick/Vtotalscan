@@ -5,7 +5,6 @@
 
 <div align="center">
   <strong>Uma ferramenta de análise de ameaças que automatiza a consulta de IOCs e repositórios em múltiplas fontes, gera relatórios e cria resumos com IA local.</strong>
-  
 </div>
 
 <br>
@@ -34,6 +33,7 @@
 <summary><strong>Sumário</strong> <sub>(clique para expandir)</sub></summary>
 <br/>
 
+- [Sobre o Projeto](#sobre)
 - [Comece a Usar em 30 Segundos](#comece)
 - [Instalação](#instalacao)
   - [Windows](#windows)
@@ -50,49 +50,57 @@
 
 </details>
 
+<a id="sobre"></a>
+## Sobre o Projeto
+
+O projeto começou como um script simples para um colega e evoluiu para esta suíte de análise completa. A ferramenta automatiza consultas a múltiplas fontes (VirusTotal, AbuseIPDB, Shodan, etc.), gera relatórios detalhados em Excel e PDF, e utiliza um modelo de IA local (via Ollama) para criar resumos executivos das análises.
+
 <a id="comece"></a>
-## ⚡ Comece a Usar em 30 Segundos
+## Comece a Usar em 30 Segundos
 
 A maneira mais rápida de começar é baixando a versão mais recente para o seu sistema operacional.
 
 1. Baixe o executável na página de **[Releases](https://github.com/DevGreick/ThreatSpy/releases)**.
 2. Descompacte e execute o arquivo.
-3. Na primeira vez, vá em **Configurações** e adicione sua chave de API do **VirusTotal**. É a única obrigatória.
+3. Na primeira vez, vá em **Configurações** e adicione sua chave de API do **VirusTotal** (é a única obrigatória).
 
 <a id="instalacao"></a>
-## 📦 Instalação
+## Instalação
 
 <a id="windows"></a>
 ### Windows
 
 1. Acesse a página de Releases.
-2. Baixe o arquivo `.zip` para Windows.
-3. Descompacte em uma pasta.
+2. Baixe o arquivo `.zip` da versão mais recente para Windows.
+3. Descompacte o arquivo em uma pasta de sua preferência.
 4. Execute `ThreatSpy.exe`.
 
 <a id="macos"></a>
 ### macOS
 
 1. Acesse a página de Releases.
-2. Baixe o arquivo `.zip` para macOS.
-3. Descompacte e abra `ThreatSpy.app`.
-4. Se o macOS avisar sobre segurança, clique com o botão direito em **Abrir** e confirme.
+2. Baixe o arquivo `.zip` da versão para macOS.
+3. Descompacte e execute `ThreatSpy.app`.
+4. Nota: o macOS pode exibir um aviso de segurança. Se isso ocorrer, clique com o botão direito, selecione **Abrir** e confirme.
 
 <a id="linux"></a>
 ### Linux
 
 1. Acesse a página de Releases.
-2. Baixe o `.zip` para Linux e extraia.
-3. Torne o binário executável e rode:
+2. Baixe o arquivo `.zip` da versão para Linux.
+3. Descompacte e torne o binário executável:
    ```bash
    chmod +x ./ThreatSpy
+   ```
+4. Execute o programa:
+   ```bash
    ./ThreatSpy
    ```
 
 <a id="codigo-fonte"></a>
 ### A partir do Código-Fonte
 
-Pré-requisitos: Python 3.8+ e Git. Para IA, o **Ollama** deve estar instalado e rodando.
+Pré-requisitos: Python 3.8+ e Git. Para a função de IA, o **Ollama** deve estar instalado e rodando.
 
 ```bash
 # Clone o repositório
@@ -111,44 +119,44 @@ python main_gui.py
 ```
 
 <a id="configuracao"></a>
-## ⚙️ Configuração Essencial
+## Configuração Essencial
 
-Após instalar, clique em **Configurações** no canto superior direito e adicione as chaves.
+Após instalar, a etapa mais importante é configurar as chaves de API. Clique no botão **Configurações** no canto superior direito.
 
-- **Chave principal (essencial)**: **VirusTotal**. Necessária para análise de IPs, URLs e arquivos.
+- **Chave principal (essencial)**: **VirusTotal**. Obrigatória para análise de IPs, URLs e arquivos.
 - **Chaves opcionais (recomendadas)**:
-  - **AbuseIPDB**. Score de abuso e localização de IPs.
-  - **Shodan**. Portas, serviços e possíveis CVEs.
-  - **URLHaus**. URLs ativamente maliciosas.
-  - **MalwareBazaar**. Identificação de malware por hash.
-  - **GitHub/GitLab**. Essenciais para análise de repositórios sem bloqueios de API.
-  - **Ollama**. Resumos por IA local (endpoint padrão já configurado).
-- As chaves são salvas via **keyring** do sistema.
+  - **AbuseIPDB**: score de abuso e localização de IPs.
+  - **Shodan**: portas, serviços e possíveis CVEs.
+  - **URLHaus**: verificação de URLs ativamente maliciosas.
+  - **MalwareBazaar**: identificação de famílias de malware por hash.
+  - **GitHub/GitLab**: análise de repositórios sem bloqueios de API.
+  - **Ollama**: resumos com IA local (endpoint padrão já configurado).
+- As chaves são salvas com **keyring** do sistema.
 
 <a id="como-usar"></a>
-## 🛠️ Como Usar
+## Como Usar
 
 A ferramenta possui dois fluxos de análise principais.
 
 | Tipo de Análise        | Como Fazer |
 |------------------------|------------|
-| IPs e URLs             | Na aba **Análise de IOCs**, cole os indicadores e clique em **Analisar Alvos**. |
+| IPs e URLs             | Na aba **Análise de IOCs**, cole os indicadores na caixa de texto e clique em **Analisar Alvos**. |
 | Arquivos               | Em **Análise de IOCs**, clique em **Verificar Reputação de Arquivos** e selecione um ou mais arquivos. |
-| Repositórios           | Na aba **Análise de Repositório**, cole as URLs do GitHub/GitLab e clique em **Analisar Repositórios**. |
+| Repositórios           | Vá para a aba **Análise de Repositório**, cole as URLs do GitHub/GitLab e clique em **Analisar Repositórios**. |
 | Relatórios e Resumos   | Após a análise, use **Resumo Gerado por IA** para exportar texto ou PDF. |
 
 <a id="funcionalidades"></a>
-## ✨ Funcionalidades Principais
+## Funcionalidades Principais
 
-- Análise paralela de indicadores.
+- Análise massivamente paralela de indicadores.
 - Análise remota de repositórios: segredos, arquivos sensíveis, IOCs em Base64 e scripts maliciosos.
-- GUI em **PySide6** com tema escuro e abas.
-- Relatórios em **Excel (.xlsx)** e **PDF**, com *defang* automático.
+- Interface gráfica moderna em **PySide6** com tema escuro e abas.
+- Relatórios em **Excel** (.xlsx) e **PDF**, com *defang* automático.
 - Resumos com IA local via **Ollama**.
-- Chaves salvas com **keyring**. Retentativas e logs para lidar com limites de API.
+- Gestão segura de chaves com **keyring** e retentativas para lidar com limites de API.
 
 <a id="tecnologias"></a>
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 | Tecnologia              | Propósito                            |
 |-------------------------|--------------------------------------|
@@ -156,8 +164,8 @@ A ferramenta possui dois fluxos de análise principais.
 | PySide6 (Qt)            | Interface gráfica multiplataforma    |
 | Ollama                  | Execução de modelos de IA locais     |
 | Requests                | Comunicação com APIs de TI           |
-| Keyring                 | Armazenamento seguro de chaves       |
-| XlsxWriter / ReportLab  | Relatórios em Excel e PDF            |
+| Keyring                 | Armazenamento seguro das chaves      |
+| XlsxWriter / ReportLab  | Geração de relatórios em Excel e PDF |
 | PyInstaller             | Empacotamento em executáveis         |
 
 <a id="contribuicao"></a>
