@@ -54,7 +54,7 @@ O projeto começou como um script simples para um colega e evoluiu para esta su�
 
 ## 🚨 Caso real: golpe do repositório falso
 
-Recentemente, um golpe de recrutamento no LinkedIn usou repositórios GitHub maliciosos como "testes técnicos" para DEVs. O objetivo era fazer o candidato clonar o projeto e rodar um script de instalação malicioso (`npm install`) para infectar sua máquina e roubar credenciais.
+Recentemente, um golpe de recrutamento no LinkedIn usou repositórios GitHub maliciosos como testes técnicos para DEVs. O objetivo era fazer o candidato clonar o projeto e rodar um script de instalação malicioso (`npm install`) para infectar sua máquina e roubar credenciais.
 
 O ThreatSpy foi aprimorado para detectar exatamente este tipo de ameaça sem precisar clonar ou executar nada. Basta usar a aba **Análise de Repositório** e colar a URL suspeita. A ferramenta irá verificar:
 
