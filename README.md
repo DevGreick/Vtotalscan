@@ -97,7 +97,7 @@ python main_gui.py
 ```
 
 <a id="config"></a>
-## ⚙️ Configuração Essencial
+## Configuração Essencial
 
 Após instalar, a etapa mais importante é configurar as chaves de API. **Apenas a chave do VirusTotal é obrigatória.**
 
@@ -112,6 +112,7 @@ Após instalar, a etapa mais importante é configurar as chaves de API. **Apenas
 | Ollama (IA)    | Opcional    | Resumos automáticos com IA local.                 |
 
 **Onde as chaves são salvas?**  
+
 O ThreatSpy usa a biblioteca `keyring`, que armazena as chaves no cofre de credenciais nativo:
 
 - Windows: Gerenciador de Credenciais do Windows  
@@ -140,7 +141,7 @@ https://github.com/DevGreick/threatspy-test-env
 3. Clique em **Analisar Repositórios**. A ferramenta detecta segredos expostos, IOC em Base64 no `.env` e gera relatório de risco sem clonar.
 
 <a id="features"></a>
-## ✨ Funcionalidades Principais
+## Funcionalidades Principais
 
 - Análise massivamente paralela de indicadores.  
 - Análise de repositórios GitHub e GitLab sem clonar, buscando segredos, arquivos sensíveis, IOCs em Base64 e scripts maliciosos.  
@@ -157,7 +158,7 @@ https://github.com/DevGreick/threatspy-test-env
 - Não analise dados ou sistemas de terceiros sem autorização explícita.
 
 <a id="tech"></a>
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 | Tecnologia          | Propósito                                  |
 | ------------------- | ------------------------------------------ |
