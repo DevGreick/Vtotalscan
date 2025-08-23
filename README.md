@@ -92,27 +92,36 @@ chmod +x ThreatSpy
 
 **Exemplo 1: Analisando IOCs**
 
-Abra **Análise de IOCs** e cole indicadores, um por linha:
+Abra **Análise de IOCs** e cole indicadores (um por linha), ou clique em **Importar Alvos de Arquivo** para enviar IPs/domínios em lote:
+
 ```
 185.172.128.150
 https://some-random-domain.net/path
 8.8.8.8
 ```
+
 Clique em **Analisar Alvos**. O app consulta APIs em paralelo e gera um Excel com os resultados.
 
+---
+
 **Exemplo 2: Analisando um repositório suspeito**
+
 ```
 https://github.com/DevGreick/threatspy-test-env
 ```
-Clique em **Analisar Repositórios**. A ferramenta detecta segredos e IOCs, gerando um relatório sem clonar o repositório.
+
+Clique em **Analisar Repositórios**. A ferramenta detecta segredos e IOCs, gerando um relatório sem precisar clonar o repositório inteiro.
+
+---
 
 **Exemplo 3: Analisando Arquivos Locais**
 
 - Na aba **Análise de IOCs**, clique em **Verificar Reputação de Arquivos**.  
 - Selecione um ou mais arquivos (PDFs, executáveis, etc.).  
-- O ThreatSpy não envia seus arquivos, apenas calcula o hash SHA256 localmente e o consulta no VirusTotal e MalwareBazaar.  
+- O ThreatSpy **não envia seus arquivos**: ele calcula o hash SHA256 localmente e consulta no VirusTotal e no MalwareBazaar.  
 
 ---
+
 
 <a id="features"></a>
 
