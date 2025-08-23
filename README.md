@@ -208,7 +208,7 @@ Para um guia detalhado sobre como obter e configurar cada chave, consulte o noss
 ## ⚖️ Use com responsabilidade
 
 - Ferramenta para fins educacionais e de análise de segurança.
-- Esteja ciente dos limites de API. A maioria dos serviços (como o VirusTotal) possui um limite de requisições para chaves gratuitas. Análises em massa podem resultar em bloqueios temporários. Para uso intensivo, considere uma chave de API paga.
+- Eesteja ciente de que a maioria dos serviços (como o VirusTotal) impõe limites de requisições para chaves gratuitas, esses limites são adequados para uso pessoal ou moderado, caso a utilização seja em ambiente corporativo ou com grande volume de análises (ex.: varrer centenas de domínios, IPs ou arquivos por dia), considere adquirir uma chave de API paga para garantir estabilidade.
 - Respeite os Termos de Serviço das APIs utilizadas.  
 - Não analise dados ou sistemas de terceiros sem autorização explícita.  
 
