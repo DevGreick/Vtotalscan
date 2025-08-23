@@ -7,15 +7,16 @@ As chaves são armazenadas de forma segura no cofre de credenciais do seu sistem
 
 ## 📑 Sumário
 
-- [VirusTotal (Obrigatória)](#virustotal-obrigatória)  
-- [GitHub / GitLab (Recomendada)](#github--gitlab-recomendada)  
-- [AbuseIPDB (Opcional)](#abuseipdb-opcional)  
-- [Shodan (Opcional)](#shodan-opcional)  
-- [URLHaus & MalwareBazaar (Opcional)](#urlhaus--malwarebazaar-opcional)  
-- [Ollama (Opcional)](#ollama-opcional)  
+- [VirusTotal (Obrigatória)](#virustotal)  
+- [GitHub / GitLab (Recomendada)](#github)  
+- [AbuseIPDB (Opcional)](#abuseipdb)  
+- [Shodan (Opcional)](#shodan)  
+- [URLHaus & MalwareBazaar (Opcional)](#urlhaus-malwarebazaar)  
+- [Ollama (Opcional)](#ollama)  
 
 ---
 
+<a id="virustotal"></a>
 ## 🔑 VirusTotal (Obrigatória)
 
 **Propósito:** Essencial para verificar a reputação de IPs, URLs, domínios e hashes de arquivos.  
@@ -39,6 +40,7 @@ Caso a utilização seja em **ambiente corporativo ou com grande volume de anál
 
 ---
 
+<a id="github"></a>
 ## 🔑 GitHub / GitLab (Recomendada)
 
 **Propósito:** Permite a análise de repositórios privados e aumenta o limite de requisições para APIs de repositórios públicos.  
@@ -57,6 +59,7 @@ Na aba **Configurações**, cole o token nos campos correspondentes do GitHub ou
 
 ---
 
+<a id="abuseipdb"></a>
 ## 🔑 AbuseIPDB (Opcional)
 
 **Propósito:** Fornece um "score de abuso" para endereços IP, indicando a probabilidade de ser uma fonte maliciosa.  
@@ -73,6 +76,7 @@ Na aba **Configurações**, cole a chave no campo do AbuseIPDB.
 
 ---
 
+<a id="shodan"></a>
 ## 🔑 Shodan (Opcional)
 
 **Propósito:** Identifica portas abertas, serviços e banners para um determinado endereço IP.  
@@ -88,6 +92,7 @@ Na aba **Configurações**, cole a chave no campo do Shodan.
 
 ---
 
+<a id="urlhaus-malwarebazaar"></a>
 ## 🔑 URLHaus & MalwareBazaar (Opcional)
 
 **Propósito:**  
@@ -111,6 +116,7 @@ Na aba **Configurações**, cole as chaves nos campos correspondentes do URLHaus
 
 ---
 
+<a id="ollama"></a>
 ## 🔑 Ollama (Opcional)
 
 **Propósito:** Habilita a funcionalidade de resumo por IA, rodando modelos de linguagem localmente para garantir a privacidade.  
