@@ -28,7 +28,7 @@ As chaves são armazenadas de forma segura no cofre de credenciais do seu sistem
 3. Copie a chave exibida.  
 
 ### Configuração no ThreatSpy
-Na primeira vez que você executar uma análise de IOCs, o ThreatSpy solicitará a chave do VirusTotal. Cole-a no campo correspondente.  
+Na primeira vez que você executar, o ThreatSpy solicitará a chave do VirusTotal. Cole-a no campo correspondente.  
 
 ---
 
