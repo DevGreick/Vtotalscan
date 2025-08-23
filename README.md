@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🔎 ThreatSpy</h1>
+  <h1 align="center">🔎 ThreatSpy</h1>
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/spy2-1.png" alt="Logo do ThreatSpy" width="150"/>
 </div>
 
@@ -32,22 +32,22 @@
 
 ---
 
-<details>
-<summary><strong>📑 Sumário (clique para expandir)</strong></summary>
+<a id="sumario"></a>
+
+## 📑 Sumário
 
 - [⚡ Comece a Usar em 30 Segundos](#start)
 - [🛠️ Como Usar (Exemplos Práticos)](#uso)
 - [✨ Funcionalidades Principais](#features)
 - [✅ Requisitos](#requisitos)
 - [📦 Instalação pelo Código-Fonte](#instalacao)
+- [⚙️ Configuração Essencial](#configuracao-essencial)
 - [⚖️ Use com responsabilidade](#responsavel)
 - [⚠️ Aviso de Segurança e Privacidade](#aviso)
 - [🛠️ Tecnologias Utilizadas](#tech)
 - [🤝 Contribuição](#contribuicao)
 - [☕ Apoie o Projeto](#apoie)
 - [📜 Licença](#licenca)
-
-</details>
 
 ---
 
@@ -184,6 +184,25 @@ python main_gui.py
 
 ---
 
+<a id="configuracao-essencial"></a>
+
+## ⚙️ Configuração Essencial
+
+| Serviço       | Necessidade | O que habilita? |
+|---------------|-------------|-----------------|
+| VirusTotal    | Obrigatória | Reputação de IPs, URLs e arquivos |
+| GitHub/GitLab | Recomendada | Análise de repositórios privados |
+| AbuseIPDB     | Opcional    | Score de abuso de IPs |
+| Shodan        | Opcional    | Portas e serviços para IPs |
+| URLHaus       | Opcional    | Maiores limites de consulta |
+| MalwareBazaar | Opcional    | Maiores limites de consulta |
+| Ollama (IA)   | Opcional    | Resumos automáticos locais |
+
+As chaves são salvas de forma segura com **keyring** no cofre do seu sistema operacional.  
+Para um guia detalhado sobre como obter e configurar cada chave, consulte o nosso [Guia de Configuração de APIs (config.md)](./config.md).  
+
+---
+
 <a id="responsavel"></a>
 
 ## ⚖️ Use com responsabilidade
@@ -191,8 +210,7 @@ python main_gui.py
 - Ferramenta para fins educacionais e de análise de segurança.
 - Esteja ciente dos limites de API. A maioria dos serviços (como o VirusTotal) possui um limite de requisições para chaves gratuitas (ex: 4 consultas por minuto). Análises em massa podem resultar em bloqueios temporários. Para uso intensivo, considere uma chave de API paga.
 - Respeite os Termos de Serviço das APIs utilizadas.  
-- Não analise dados ou sistemas de terceiros sem autorização explícita.
-
+- Não analise dados ou sistemas de terceiros sem autorização explícita.  
 
 ---
 
@@ -206,7 +224,8 @@ Esta ferramenta interage com serviços externos para análise. Isso significa:
 - Se você analisar dados internos (como repositórios privados), eles podem ser expostos a essas APIs.  
 - Funções de IA usam o Ollama local por padrão (`http://localhost:11434`). Caso configure um endpoint remoto, os dados sairão da sua máquina.  
 
-Use por sua conta e risco. O desenvolvedor não se responsabiliza por uso indevido ou vazamento de dados decorrente do uso da ferramenta.
+Use por sua conta e risco. O desenvolvedor não se responsabiliza por vazamentos causados pelo uso indevido.  
+
 ---
 
 <a id="tech"></a>
@@ -253,4 +272,4 @@ Use por sua conta e risco. O desenvolvedor não se responsabiliza por uso indevi
 
 ## 📜 Licença
 
-Distribuído sob a licença MIT. Veja o arquivo <a href="https://github.com/DevGreick/ThreatSpy/blob/master/LICENSE">LICENSE</a> para mais informações.
+Distribuído sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/DevGreick/ThreatSpy/blob/master/LICENSE) para mais informações.
