@@ -30,15 +30,13 @@ As chaves são armazenadas de forma segura no cofre de credenciais do seu sistem
 ### Configuração no ThreatSpy
 Na primeira vez que você executar uma análise de IOCs, o ThreatSpy solicitará a chave do VirusTotal. Cole-a no campo correspondente.  
 
-### Nota sobre limites de API
-A maioria dos serviços (como o VirusTotal) impõe limites de requisições para chaves gratuitas.  
-Esses limites são adequados para **uso pessoal ou moderado**.  
-
-**Exemplo de uso moderado:** verificar algumas dezenas de domínios, IPs ou arquivos por semana.  
-
-Caso a utilização seja em **ambiente corporativo ou com grande volume de análises (ex.: varrer centenas de domínios, IPs ou arquivos por dia)**, considere adquirir uma **chave de API paga** para garantir estabilidade e evitar bloqueios.  
-
 ---
+
+> **Nota sobre limites de API:**  
+> A maioria dos serviços (como o VirusTotal) impõe limites de requisições para chaves gratuitas.  
+> Esses limites são adequados para **uso pessoal ou moderado**.  
+> **Exemplo de uso moderado:** verificar algumas dezenas de domínios, IPs ou arquivos por semana.  
+> Caso a utilização seja em **ambiente corporativo ou com grande volume de análises (ex.: varrer centenas de domínios, IPs ou arquivos por dia)**, considere adquirir uma **chave de API paga** para garantir estabilidade e evitar bloqueios.
 
 <a id="github"></a>
 ## 🔑 GitHub / GitLab (Recomendada)
@@ -117,6 +115,8 @@ Na aba **Configurações**, cole as chaves nos campos correspondentes do URLHaus
 ---
 
 <a id="ollama"></a>
+
+
 ## 🔑 Ollama (Opcional)
 
 **Propósito:** Habilita a funcionalidade de resumo por IA, rodando modelos de linguagem localmente para garantir a privacidade.  
