@@ -67,7 +67,7 @@ Na aba **Configurações**, cole o token nos campos correspondentes do GitHub ou
 
 ---
 
-**Dica prática – verifique seu limite atual antes de rodar análises:**
+**Dica: verifique seu limite atual antes de rodar análises:**
 
 ```bash
 curl -i -H "Authorization: Bearer SEU_TOKEN_AQUI" https://api.github.com/rate_limit
