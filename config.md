@@ -32,7 +32,7 @@ Na primeira vez que você executar uma análise de IOCs, o ThreatSpy solicitará
 
 ---
 
-> **Nota sobre limites de API:**  
+# Notas sobre Limites de API
 > A maioria dos serviços (como o VirusTotal) impõe limites de requisições para chaves gratuitas.  
 > Esses limites são adequados para **uso pessoal ou moderado**.  
 > **Exemplo de uso moderado:** verificar algumas dezenas de domínios, IPs ou arquivos por semana.  
@@ -58,7 +58,6 @@ Na aba **Configurações**, cole o token nos campos correspondentes do GitHub ou
 
 # Notas sobre Limites de API
 
-> **Nota sobre limites de API:**  
 > A análise de um único repositório pode gerar dezenas de chamadas à API do GitHub para listar diretórios e arquivos.  
 > Sem token, o limite é de **aprox. 60 requisições por hora** por IP.  
 > Com token, esse limite sobe para **5.000 requisições por hora** por usuário.  
