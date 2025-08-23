@@ -38,6 +38,7 @@ Na primeira vez que você executar uma análise de IOCs, o ThreatSpy solicitará
 > **Exemplo de uso moderado:** verificar algumas dezenas de domínios, IPs ou arquivos por semana.  
 > Caso a utilização seja em **ambiente corporativo ou com grande volume de análises (ex.: varrer centenas de domínios, IPs ou arquivos por dia)**, considere adquirir uma **chave de API paga** para garantir estabilidade e evitar bloqueios.
 
+
 <a id="github"></a>
 ## 🔑 GitHub / GitLab (Recomendada)
 
@@ -55,6 +56,11 @@ Na primeira vez que você executar uma análise de IOCs, o ThreatSpy solicitará
 ### Configuração no ThreatSpy
 Na aba **Configurações**, cole o token nos campos correspondentes do GitHub ou GitLab.  
 
+> **Nota sobre limites de API:**  
+> A análise de um único repositório pode gerar dezenas de requisições à API do GitHub para listar todos os seus arquivos.
+> Sem um token, o limite é de aproximadamente 60 requisições por hora, o que é muito baixo e pode ser esgotado rapidamente
+> Com um token, o limite sobe para **5.000 requisições** por hora.
+> Para evitar falhas, o ThreatSpy exibirá um aviso se você tentar analisar mais de 2 repositórios simultaneamente. Para varreduras maiores, é altamente recomendado o uso de um token e a análise em lotes menores.
 ---
 
 <a id="abuseipdb"></a>
