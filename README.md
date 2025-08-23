@@ -199,7 +199,13 @@ python main_gui.py
 | Ollama (IA)   | Opcional    | Resumos automáticos locais |
 
 As chaves são salvas de forma segura com **keyring** no cofre do seu sistema operacional.  
-Para um guia detalhado sobre como obter e configurar cada chave, consulte o nosso [Guia de Configuração de APIs (config.md)](./config.md).  
+Para um guia detalhado sobre como obter e configurar cada chave, consulte o nosso [Guia de Configuração de APIs (config.md)](./config.md).
+
+> **Nota sobre limites de API:**  
+> A maioria dos serviços (como o VirusTotal) impõe limites de requisições para chaves gratuitas.  
+> Esses limites são adequados para **uso pessoal ou moderado**.  
+> Caso a utilização seja em **ambiente corporativo ou com grande volume de análises (ex.: varrer centenas de domínios, IPs ou arquivos por dia)**, considere adquirir uma **chave de API paga** para garantir estabilidade.
+
 
 ---
 
@@ -208,7 +214,6 @@ Para um guia detalhado sobre como obter e configurar cada chave, consulte o noss
 ## ⚖️ Use com responsabilidade
 
 - Ferramenta para fins educacionais e de análise de segurança.
-- Eesteja ciente de que a maioria dos serviços (como o VirusTotal) impõe limites de requisições para chaves gratuitas, esses limites são adequados para uso pessoal ou moderado, caso a utilização seja em ambiente corporativo ou com grande volume de análises (ex.: varrer centenas de domínios, IPs ou arquivos por dia), considere adquirir uma chave de API paga para garantir estabilidade.
 - Respeite os Termos de Serviço das APIs utilizadas.  
 - Não analise dados ou sistemas de terceiros sem autorização explícita.  
 
