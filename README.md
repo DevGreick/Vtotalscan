@@ -204,8 +204,7 @@ Esta ferramenta interage com serviços externos para análise. Isso significa:
 - Se você analisar dados internos (como repositórios privados), eles podem ser expostos a essas APIs.  
 - Funções de IA usam o Ollama local por padrão (`http://localhost:11434`). Caso configure um endpoint remoto, os dados sairão da sua máquina.  
 
-Use por sua conta e risco. O mantenedor não se responsabiliza por vazamentos causados pelo uso indevido.  
-
+Use por sua conta e risco. O desenvolvedor não se responsabiliza por uso indevido ou vazamento de dados decorrente do uso da ferramenta.
 ---
 
 <a id="tech"></a>
