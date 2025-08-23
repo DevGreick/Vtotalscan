@@ -57,8 +57,8 @@ Na primeira vez que você executar uma análise de IOCs, o ThreatSpy solicitará
 Na aba **Configurações**, cole o token nos campos correspondentes do GitHub ou GitLab.  
 
 > **Nota sobre limites de API:**  
-> A análise de um único repositório pode gerar dezenas de requisições, à API do GitHub para listar todos os seus arquivos.
-> Sem um token, o limite é de aproximadamente 60 requisições por hora, o que é muito baixo e pode ser esgotado rapidamente
+> A análise de um único repositório pode gerar dezenas de requisições à API do GitHub para listar todos os seus arquivos.
+> Sem um token, o limite é de aproximadamente **60 requisições por hora**, o que é muito baixo e pode ser esgotado rapidamente
 > Com um token, o limite sobe para **5.000 requisições** por hora.
 > Para evitar falhas, o ThreatSpy exibirá um aviso se você tentar analisar mais de 2 repositórios simultaneamente. Para varreduras maiores, é altamente recomendado o uso de um token e a análise em lotes menores.
 ---
