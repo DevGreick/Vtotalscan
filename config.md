@@ -66,7 +66,6 @@ Na aba **Configurações**, cole o token nos campos correspondentes do GitHub ou
 >  
 > Com token, esse limite sobe para **5.000 requisições por hora** por usuário.  
 >  
-> Atenção: alguns endpoints (como *code search*) possuem **limites menores mesmo com token** (ex.: 30 buscas por minuto).  
 >  
 > Para evitar falhas, o ThreatSpy alerta se você tentar analisar mais de **2 repositórios** ao mesmo tempo.  
 >  
