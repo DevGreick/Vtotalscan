@@ -191,7 +191,7 @@ python main_gui.py
 | Serviço       | Necessidade | O que habilita? |
 |---------------|-------------|-----------------|
 | VirusTotal    | Obrigatória | Reputação de IPs, URLs e arquivos |
-| GitHub/GitLab | Recomendada | Análise de repositórios privados |
+| GitHub/GitLab | Recomendada | Análise de repositórios com mais limites da API |
 | AbuseIPDB     | Opcional    | Score de abuso de IPs |
 | Shodan        | Opcional    | Portas e serviços para IPs |
 | URLHaus       | Opcional    | Maiores limites de consulta |
