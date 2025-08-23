@@ -208,7 +208,7 @@ Para um guia detalhado sobre como obter e configurar cada chave, consulte o noss
 ## ⚖️ Use com responsabilidade
 
 - Ferramenta para fins educacionais e de análise de segurança.
-- Esteja ciente dos limites de API. A maioria dos serviços (como o VirusTotal) possui um limite de requisições para chaves gratuitas (ex: 4 consultas por minuto). Análises em massa podem resultar em bloqueios temporários. Para uso intensivo, considere uma chave de API paga.
+- Esteja ciente dos limites de API. A maioria dos serviços (como o VirusTotal) possui um limite de requisições para chaves gratuitas. Análises em massa podem resultar em bloqueios temporários. Para uso intensivo, considere uma chave de API paga.
 - Respeite os Termos de Serviço das APIs utilizadas.  
 - Não analise dados ou sistemas de terceiros sem autorização explícita.  
 
