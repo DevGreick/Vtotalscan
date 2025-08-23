@@ -188,9 +188,11 @@ python main_gui.py
 
 ## ⚖️ Use com responsabilidade
 
-- Ferramenta para fins educacionais e de análise de segurança.  
+- Ferramenta para fins educacionais e de análise de segurança.
+- Esteja ciente dos limites de API. A maioria dos serviços (como o VirusTotal) possui um limite de requisições para chaves gratuitas (ex: 4 consultas por minuto). Análises em massa podem resultar em bloqueios temporários. Para uso intensivo, considere uma chave de API paga.
 - Respeite os Termos de Serviço das APIs utilizadas.  
-- Não analise dados ou sistemas de terceiros sem autorização explícita.  
+- Não analise dados ou sistemas de terceiros sem autorização explícita.
+
 
 ---
 
