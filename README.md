@@ -62,18 +62,18 @@ Baixe a versão do seu sistema em [Releases](https://github.com/DevGreick/Threat
 Abra o ThreatSpy e adicione a chave do VirusTotal.
 
 ### Windows
-- Acesse Releases.  
+- Acesse [Releases](https://github.com/DevGreick/ThreatSpy/releases).
 - Baixe `ThreatSpyWindows.zip`.  
 - Descompacte e execute `ThreatSpy.exe`.  
 
 ### macOS
-- Acesse Releases.  
+- Acesse [Releases](https://github.com/DevGreick/ThreatSpy/releases).
 - Baixe `ThreatSpy.app.zip`.  
 - Descompacte e abra `ThreatSpy.app`.  
 - Se houver aviso de segurança, clique com o botão direito em **Abrir** e confirme.  
 
 ### Linux
-- Acesse Releases.  
+- Acesse [Releases](https://github.com/DevGreick/ThreatSpy/releases).
 - Baixe `ThreatSpyLinux.zip`.  
 - Descompacte e torne executável:  
 ```bash
