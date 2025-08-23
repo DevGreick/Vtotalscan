@@ -106,6 +106,8 @@ Clique em **Analisar Alvos**. O app consulta APIs em paralelo e gera um Excel co
 
 **Exemplo 2: Analisando um repositório suspeito**
 
+Abra **Análise de Repositórios** e cole repositórios (um por linha), ou clique em **Importar Alvos de Arquivo** para enviar repositórios em lote (*não recomendado sem token de API; para volumes corporativos, pode ser necessário GitHub Enterprise*).  
+
 ```
 https://github.com/DevGreick/threatspy-test-env
 ```
