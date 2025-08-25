@@ -210,7 +210,7 @@ python main_gui.py
 | Ollama (IA)   | Opcional    | Resumos automáticos locais |
 
 As chaves são salvas de forma segura com **keyring** no cofre do seu sistema operacional.  
-Para um guia detalhado sobre como obter e configurar cada chave, consulte o nosso [Guia de Configuração de APIs (config.md)](./config.md).
+Para um guia detalhado sobre como obter e configurar cada chave, consulte o nosso [Guia de Configuração de APIs ](./config.md).
 
 ---
 
